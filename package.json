@@ -1,0 +1,32 @@
+{
+  "name": "neetha-nursing-service",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.20.0",
+    "next": "15.0.0",
+    "react": "19.0.0-rc-6f23340e20-20241011",
+    "react-dom": "19.0.0-rc-6f23340e20-20241011",
+    "zod": "^3.23.8",
+    "react-hook-form": "^7.53.0",
+    "@hookform/resolvers": "^3.9.0",
+    "lucide-react": "^0.453.0",
+    "razorpay": "^2.9.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.9",
+    "@types/react": "19.0.0-rc-6f23340e20-20241011",
+    "@types/react-dom": "19.0.0-rc-6f23340e20-20241011",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.13",
+    "typescript": "^5.5.4",
+    "prisma": "^5.20.0"
+  }
+}

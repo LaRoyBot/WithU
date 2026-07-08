@@ -1,0 +1,124 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model AdminUser {
+  id           String      @id @default(uuid())
+  email        String      @unique
+  passwordHash String
+  name         String
+  role         String      @default("OPERATOR") // "SUPER_ADMIN", "ADMIN", "OPERATOR"
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  statusLogs   BookingStatusEvent[]
+}
+
+model Customer {
+  id               String    @id @default(uuid())
+  name             String
+  phone            String    @unique
+  email            String?
+  addressLine1     String
+  addressLine2     String?
+  city             String    @default("Hyderabad")
+  pincode          String
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // DPDP Compliance fields
+  consentGiven     Boolean   @default(false)
+  consentTimestamp DateTime?
+  consentIpAddress String?
+  consentVersion   String?
+  isDataArchived   Boolean   @default(false)
+
+  bookings         Booking[]
+}
+
+model Nurse {
+  id              String   @id @default(uuid())
+  name            String
+  phone           String   @unique
+  gender          String
+  qualification   String
+  experienceYears Int
+  status          String   @default("ACTIVE") // "ACTIVE", "INACTIVE", "ON_DUTY", "ON_LEAVE"
+  skills          String   // Comma-separated list of qualified services (e.g. "elderly_care,wound_dressing")
+  baseLocation    String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  bookings        Booking[]
+}
+
+model Service {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  description String
+  basePrice   Float     // SQLite uses Float. Switch to Decimal(10,2) in PostgreSQL.
+  priceUnit   String    @default("day") // "hour", "day", "visit"
+  minimumDays Int       @default(1)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  bookings    Booking[]
+}
+
+model Booking {
+  id                  String               @id @default(uuid())
+  bookingNumber       String               @unique
+  customerId          String
+  customer            Customer             @relation(fields: [customerId], references: [id])
+  serviceId           String
+  service             Service              @relation(fields: [serviceId], references: [id])
+  nurseId             String?
+  nurse               Nurse?               @relation(fields: [nurseId], references: [id])
+
+  // Schedule
+  startDate           DateTime
+  endDate             DateTime
+  shiftType           String               // "DAY_12HR", "NIGHT_12HR", "FULL_24HR", "HOURLY"
+  totalDays           Int
+
+  // Pricing & Billing
+  totalAmount         Float
+  advancePaid         Float                @default(0.0)
+  paymentStatus       String               @default("PENDING") // "PENDING", "PARTIAL", "PAID", "REFUNDED"
+  paymentGatewayId    String?
+  otpCode             String?
+  otpExpires          DateTime?
+
+  // Patient Info - Encrypted at rest at application level
+  patientName         String
+  patientAge          Int
+  patientGender       String
+  medicalConditions   String               // Will store encrypted string
+  specialInstructions String?              // Will store encrypted string
+
+  // State machine
+  status              String               @default("PENDING_OTP") // "PENDING_OTP", "CONFIRMED", "NURSE_ASSIGNED", "IN_PROGRESS", "COMPLETED", "CANCELLED"
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  statusEvents        BookingStatusEvent[]
+}
+
+model BookingStatusEvent {
+  id               String    @id @default(uuid())
+  bookingId        String
+  booking          Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  fromStatus       String
+  toStatus         String
+  notes            String?
+  createdAt        DateTime  @default(now())
+
+  changedByAdminId String?
+  changedByAdmin   AdminUser? @relation(fields: [changedByAdminId], references: [id])
+}
