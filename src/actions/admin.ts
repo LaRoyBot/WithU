@@ -1,7 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache'; // Next.js 15 cache revalidation API
 import { sendNurseAssignment, sendBookingCompleted } from '@/lib/whatsapp';

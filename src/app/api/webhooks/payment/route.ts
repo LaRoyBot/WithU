@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { createHmac } from 'crypto';
+import { createHmac } from 'node:crypto';
 
 export async function POST(request: Request) {
   try {

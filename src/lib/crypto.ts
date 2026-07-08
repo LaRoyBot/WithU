@@ -1,4 +1,4 @@
-import { randomBytes, createCipheriv, createDecipheriv } from 'crypto';
+import { randomBytes, createCipheriv, createDecipheriv } from 'node:crypto';
 
 const ALGORITHM = 'aes-256-gcm';
 // Fallback key for testing/dev (must be 32 bytes / 64 hex characters)
