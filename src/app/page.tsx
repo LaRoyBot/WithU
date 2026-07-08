@@ -14,7 +14,8 @@ import {
   CheckCircle2,
   ArrowRight,
   Sparkles,
-  ClipboardList
+  ClipboardList,
+  MessageCircle
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -94,11 +95,11 @@ export default function HomePage() {
               </Link>
               <a
                 href="https://wa.me/919876543210"
-                className="w-full sm:w-auto inline-flex items-center justify-center bg-white hover:bg-slate-50 text-slate-800 font-bold py-3.5 px-8 rounded-full border border-slate-200 shadow-sm transition-all duration-200 text-sm gap-2"
+                className="w-full sm:w-auto inline-flex items-center justify-center bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold py-3.5 px-8 rounded-full shadow-lg shadow-[#25D366]/20 hover:shadow-[#25D366]/30 hover:-translate-y-0.5 transition-all duration-200 text-sm gap-2"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <MessageSquare className="w-4 h-4 text-emerald-500" /> WhatsApp Support
+                <MessageSquare className="w-4 h-4" /> Chat on WhatsApp
               </a>
             </div>
           </div>
@@ -535,6 +536,17 @@ export default function HomePage() {
           © {new Date().getFullYear()} Neetha Nursing Service. All rights reserved. Encrypted with industrial standard AES-256-GCM. Fully aligned to India's DPDP Act, 2023.
         </div>
       </footer>
+
+      {/* Floating WhatsApp FAB */}
+      <a
+        href="https://wa.me/919876543210"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-[#25D366] hover:bg-[#1ebe5d] text-white rounded-full shadow-xl shadow-[#25D366]/30 hover:shadow-[#25D366]/40 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 animate-bounce"
+        aria-label="Chat on WhatsApp"
+      >
+        <MessageCircle className="w-7 h-7" />
+      </a>
     </div>
   );
 }
