@@ -85,7 +85,7 @@ export default async function DetailsPage({ searchParams }: DetailsPageProps) {
       <BookingDetailsForm
         serviceId={service.id}
         serviceName={service.name}
-        basePrice={service.basePrice}
+        basePrice={Number(service.basePrice)}
         priceUnit={service.priceUnit}
         minimumDays={service.minimumDays}
       />

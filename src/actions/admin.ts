@@ -118,7 +118,7 @@ export async function updateBookingStatus(bookingId: string, toStatus: string, n
         include: { customer: true },
       });
       if (b) {
-        await sendBookingCompleted(b.customer.phone, b.customer.name, b.bookingNumber, b.totalAmount);
+        await sendBookingCompleted(b.customer.phone, b.customer.name, b.bookingNumber, Number(b.totalAmount));
       }
     }
 

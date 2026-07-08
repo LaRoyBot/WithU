@@ -55,7 +55,7 @@ export default async function ConfirmPage({ searchParams }: ConfirmPageProps) {
         bookingId={booking.id}
         customerPhone={booking.customer.phone}
         bookingNumber={booking.bookingNumber}
-        totalAmount={booking.totalAmount}
+        totalAmount={Number(booking.totalAmount)}
       />
     </div>
   );

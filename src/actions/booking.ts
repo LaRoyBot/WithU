@@ -54,7 +54,7 @@ export async function createBookingRecord(input: BookingDetailsInput) {
     }
 
     // Pricing calculation
-    const totalAmount = service.basePrice * totalDays;
+    const totalAmount = Number(service.basePrice) * totalDays;
 
     // 3. Upsert Customer
     // Phone is unique, so we search by phone.
@@ -244,5 +244,133 @@ export async function resendBookingOtp(bookingId: string) {
   } catch (err: any) {
     console.error('OTP resending error:', err);
     return { success: false, error: 'Could not resend OTP. Try again.' };
+  }
+}
+
+/**
+ * Simplified Booking Form Submission Server Action
+ * Creates Customer, Encrypts PHI, and places booking directly into CONFIRMED status.
+ */
+export async function createQuickBooking(data: {
+  name: string;
+  phone: string;
+  serviceId: string;
+  serviceNotes: string;
+  dateNeeded: string;
+  message: string;
+}) {
+  if (!data.name || !data.phone || !data.serviceId || !data.dateNeeded) {
+    return { success: false, error: 'Please fill in all required fields' };
+  }
+
+  // Normalize phone (E.164 format)
+  const phone = data.phone.startsWith('+91')
+    ? data.phone
+    : (data.phone.startsWith('+') ? data.phone : `+91${data.phone}`);
+
+  try {
+    // 1. Fetch Service to calculate pricing
+    const service = await prisma.service.findUnique({
+      where: { id: data.serviceId },
+    });
+
+    if (!service || !service.isActive) {
+      return { success: false, error: 'The selected service is currently unavailable.' };
+    }
+
+    const start = new Date(data.dateNeeded);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(data.dateNeeded);
+    end.setHours(23, 59, 59, 999);
+
+    const totalDays = 1;
+    const totalAmount = Number(service.basePrice);
+
+    // 2. Upsert Customer
+    const customer = await prisma.customer.upsert({
+      where: { phone },
+      update: {
+        name: data.name,
+        consentGiven: true,
+        consentTimestamp: new Date(),
+        consentIpAddress: '127.0.0.1',
+        consentVersion: 'v1.0-dpdp',
+      },
+      create: {
+        name: data.name,
+        phone,
+        addressLine1: 'Quick onboarding booking form',
+        pincode: '500019',
+        consentGiven: true,
+        consentTimestamp: new Date(),
+        consentIpAddress: '127.0.0.1',
+        consentVersion: 'v1.0-dpdp',
+      },
+    });
+
+    // 3. Generate Unique Booking Number
+    let bookingNumber = generateBookingNumber();
+    let isUnique = false;
+    let attempts = 0;
+    while (!isUnique && attempts < 5) {
+      const existing = await prisma.booking.findUnique({
+        where: { bookingNumber },
+      });
+      if (!existing) {
+        isUnique = true;
+      } else {
+        bookingNumber = generateBookingNumber();
+        attempts++;
+      }
+    }
+
+    // 4. Encrypt sensitive patient PII
+    const encryptedPatientName = encrypt(data.name);
+    const encryptedMedicalConditions = encrypt(
+      `Service Custom Details: ${data.serviceNotes || 'None'}. Message: ${data.message || 'None'}`
+    );
+    const encryptedSpecialInstructions = encrypt('Submitted via simplified booking widget.');
+
+    // 5. Create Booking directly in CONFIRMED status
+    const booking = await prisma.booking.create({
+      data: {
+        bookingNumber,
+        customerId: customer.id,
+        serviceId: service.id,
+        startDate: start,
+        endDate: end,
+        shiftType: 'DAY_12HR',
+        totalDays,
+        totalAmount,
+        patientName: encryptedPatientName,
+        patientAge: 60, // default/fallback for onboarding
+        patientGender: 'Other',
+        medicalConditions: encryptedMedicalConditions,
+        specialInstructions: encryptedSpecialInstructions,
+        status: 'CONFIRMED', // Immediately confirmed
+      },
+    });
+
+    // 6. Log a status event record
+    await prisma.bookingStatusEvent.create({
+      data: {
+        bookingId: booking.id,
+        fromStatus: 'PENDING_OTP',
+        toStatus: 'CONFIRMED',
+        notes: 'Booking created directly via simplified landing page form.',
+      },
+    });
+
+    // 7. Send WhatsApp alert stub
+    try {
+      await sendBookingConfirmation(phone, data.name, bookingNumber, service.name);
+    } catch (err) {
+      console.warn('WhatsApp CSP send failure:', err);
+    }
+
+    return { success: true, bookingId: booking.id, bookingNumber };
+  } catch (err: any) {
+    console.error('Quick booking creation error:', err);
+    return { success: false, error: 'A database error occurred. Please try again.' };
   }
 }

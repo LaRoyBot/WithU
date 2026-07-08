@@ -49,7 +49,7 @@ export default async function ServicesPage() {
               </div>
               <div className="shrink-0 flex sm:flex-col items-start sm:items-end gap-3 text-right">
                 <div>
-                  <span className="text-sm font-bold text-primary-700 block">Rs. {service.basePrice}</span>
+                  <span className="text-sm font-bold text-primary-700 block">Rs. {Number(service.basePrice)}</span>
                   <span className="text-[10px] text-gray-400">per {service.priceUnit}</span>
                 </div>
                 <Link

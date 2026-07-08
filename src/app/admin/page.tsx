@@ -35,7 +35,7 @@ export default async function AdminDashboardPage() {
       endDate: b.endDate.toISOString(),
       shiftType: b.shiftType,
       totalDays: b.totalDays,
-      totalAmount: b.totalAmount,
+      totalAmount: Number(b.totalAmount),
       status: b.status,
       paymentStatus: b.paymentStatus,
       patientName: decrypt(b.patientName),

@@ -1,6 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { prisma } from '@/lib/prisma';
+import QuickBookingForm from '@/components/booking/QuickBookingForm';
 import {
   ShieldCheck,
   Lock,
@@ -18,7 +20,28 @@ import {
   MessageCircle
 } from 'lucide-react';
 
-export default function HomePage() {
+export const revalidate = 0;
+
+export default async function HomePage() {
+  let servicesList: any[] = [];
+  try {
+    servicesList = await prisma.service.findMany({
+      where: { isActive: true },
+      orderBy: { name: 'asc' },
+    });
+  } catch (err) {
+    console.warn('DB not loaded in HomePage. Using fallbacks.');
+  }
+
+  if (servicesList.length === 0) {
+    servicesList = [
+      { id: 'fallback-1', name: 'IM/IV Injection Support', basePrice: 350.0, priceUnit: 'visit' },
+      { id: 'fallback-2', name: 'Wound & Surgical Dressing', basePrice: 450.0, priceUnit: 'visit' },
+      { id: 'fallback-3', name: 'Urinary Catheter Change', basePrice: 600.0, priceUnit: 'visit' },
+      { id: 'fallback-4', name: '24/7 Dedicated Nursing Care', basePrice: 2500.0, priceUnit: 'day' },
+    ];
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 selection:bg-primary-500 selection:text-white">
       {/* Top Banner for Critical Updates / Trust */}
@@ -104,17 +127,8 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="lg:col-span-5 relative w-full aspect-square max-w-md mx-auto lg:max-w-none">
-            <div className="absolute inset-0 bg-gradient-to-tr from-primary-600 to-indigo-600 rounded-3xl rotate-3 scale-95 opacity-5 blur-sm"></div>
-            <div className="relative w-full h-full rounded-3xl overflow-hidden border border-slate-100 shadow-xl">
-              <Image
-                src="/images/original/hero-1.jpg"
-                alt="Certified Nurse providing care"
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
+          <div className="lg:col-span-5 w-full max-w-md mx-auto lg:max-w-none">
+            <QuickBookingForm services={servicesList} />
           </div>
         </div>
       </section>
@@ -160,7 +174,7 @@ export default function HomePage() {
               <p className="text-xs text-slate-500 leading-relaxed">Safe, clinical Intramuscular injection administration for vitamins, hormones, and prescribed medicines at your doorstep (Rs. 299).</p>
             </div>
             <div className="pt-6 mt-6 border-t border-slate-50">
-              <Link href="/services/im-injections" className="inline-flex items-center text-xs text-primary-600 font-bold hover:gap-1.5 transition-all">
+              <Link href="/services/im-iv-injections" className="inline-flex items-center text-xs text-primary-600 font-bold hover:gap-1.5 transition-all">
                 Read details <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Link>
             </div>
@@ -176,7 +190,7 @@ export default function HomePage() {
               <p className="text-xs text-slate-500 leading-relaxed">Certified Intravenous injections and medication deliveries directly into the bloodstream by qualified nursing professionals (Rs. 399).</p>
             </div>
             <div className="pt-6 mt-6 border-t border-slate-50">
-              <Link href="/services/iv-injections" className="inline-flex items-center text-xs text-primary-600 font-bold hover:gap-1.5 transition-all">
+              <Link href="/services/im-iv-injections" className="inline-flex items-center text-xs text-primary-600 font-bold hover:gap-1.5 transition-all">
                 Read details <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Link>
             </div>
@@ -224,7 +238,7 @@ export default function HomePage() {
               <p className="text-xs text-slate-500 leading-relaxed">Home saline drip hydration, electrolyte management, nutrient fluids, and antibiotic IV lines administered safely.</p>
             </div>
             <div className="pt-6 mt-6 border-t border-slate-50">
-              <Link href="/services/iv-hydration-drip" className="inline-flex items-center text-xs text-primary-600 font-bold hover:gap-1.5 transition-all">
+              <Link href="/services/iv-infusion-hydration" className="inline-flex items-center text-xs text-primary-600 font-bold hover:gap-1.5 transition-all">
                 Read details <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Link>
             </div>

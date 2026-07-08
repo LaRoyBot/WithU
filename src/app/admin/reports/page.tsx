@@ -52,7 +52,7 @@ export default async function AdminReportsPage() {
 
     servicePopularity = activeServices.map((service) => {
       const count = service.bookings.length;
-      const earnings = service.bookings.reduce((sum, b) => sum + b.totalAmount, 0);
+      const earnings = service.bookings.reduce((sum, b) => sum + Number(b.totalAmount), 0);
       return {
         name: service.name,
         count,

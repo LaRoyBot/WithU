@@ -64,7 +64,7 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
           <div className="bg-white border border-gray-100 p-6 rounded-xl space-y-4 text-center md:col-span-1 shadow-sm">
             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Base Rate Pricing</span>
             <div className="space-y-1">
-              <span className="text-3xl font-extrabold text-primary-700 block">Rs. {service.basePrice}</span>
+              <span className="text-3xl font-extrabold text-primary-700 block">Rs. {Number(service.basePrice)}</span>
               <span className="text-xs text-gray-400">per {service.priceUnit}</span>
             </div>
             <div className="text-[10px] text-gray-400 bg-gray-50 py-1.5 px-2 rounded">

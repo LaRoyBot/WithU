@@ -1,6 +1,7 @@
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 generator client {
@@ -61,7 +62,7 @@ model Service {
   name        String    @unique
   slug        String    @unique
   description String
-  basePrice   Float     // SQLite uses Float. Switch to Decimal(10,2) in PostgreSQL.
+  basePrice   Decimal   @db.Decimal(10, 2) // Switched to Decimal for PostgreSQL
   priceUnit   String    @default("day") // "hour", "day", "visit"
   minimumDays Int       @default(1)
   isActive    Boolean   @default(true)
@@ -88,8 +89,8 @@ model Booking {
   totalDays           Int
 
   // Pricing & Billing
-  totalAmount         Float
-  advancePaid         Float                @default(0.0)
+  totalAmount         Decimal              @db.Decimal(10, 2)
+  advancePaid         Decimal              @default(0.0) @db.Decimal(10, 2)
   paymentStatus       String               @default("PENDING") // "PENDING", "PARTIAL", "PAID", "REFUNDED"
   paymentGatewayId    String?
   otpCode             String?

@@ -47,6 +47,12 @@ export default async function AdminLayout({
             📋 Bookings Queue
           </Link>
           <Link
+            href="/admin/calendar"
+            className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-800 transition-colors text-sm font-semibold"
+          >
+            📅 Calendar Slots
+          </Link>
+          <Link
             href="/admin/roster"
             className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-gray-800 transition-colors text-sm font-semibold"
           >
