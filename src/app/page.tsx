@@ -149,19 +149,19 @@ export default function HomePage() {
           <p className="text-sm text-slate-500 leading-relaxed">Certified clinical treatments, critical post-operative support, and elderly care handled by qualified home nurses.</p>
         </div>
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {/* Card 1 */}
           <div className="bg-white border border-slate-100 p-8 rounded-2xl hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between">
             <div className="space-y-4">
               <div className="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-xl font-bold group-hover:bg-primary-600 group-hover:text-white transition-colors duration-300">
                 💉
               </div>
-              <h3 className="font-extrabold text-slate-900 text-lg">IM/IV Injections</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">Aseptic administration of daily antibiotic injections, IVF meds, and hydration drips at home.</p>
+              <h3 className="font-extrabold text-slate-900 text-lg">IM Injections</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">Safe, clinical Intramuscular injection administration for vitamins, hormones, and prescribed medicines at your doorstep (Rs. 299).</p>
             </div>
             <div className="pt-6 mt-6 border-t border-slate-50">
-              <Link href="/services/im-iv-injections" className="inline-flex items-center text-xs text-primary-600 font-bold hover:gap-1.5 transition-all">
-                Read pricing & guidelines <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              <Link href="/services/im-injections" className="inline-flex items-center text-xs text-primary-600 font-bold hover:gap-1.5 transition-all">
+                Read details <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Link>
             </div>
           </div>
@@ -170,14 +170,14 @@ export default function HomePage() {
           <div className="bg-white border border-slate-100 p-8 rounded-2xl hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between">
             <div className="space-y-4">
               <div className="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-xl font-bold group-hover:bg-primary-600 group-hover:text-white transition-colors duration-300">
-                🩹
+                🧪
               </div>
-              <h3 className="font-extrabold text-slate-900 text-lg">Surgical Dressing</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">Post-operative stitches cleaning, diabetic wound care, and bedsore dressings under strict hygiene standards.</p>
+              <h3 className="font-extrabold text-slate-900 text-lg">IV Injections</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">Certified Intravenous injections and medication deliveries directly into the bloodstream by qualified nursing professionals (Rs. 399).</p>
             </div>
             <div className="pt-6 mt-6 border-t border-slate-50">
-              <Link href="/services/wound-surgical-dressing" className="inline-flex items-center text-xs text-primary-600 font-bold hover:gap-1.5 transition-all">
-                Read pricing & guidelines <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              <Link href="/services/iv-injections" className="inline-flex items-center text-xs text-primary-600 font-bold hover:gap-1.5 transition-all">
+                Read details <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Link>
             </div>
           </div>
@@ -186,14 +186,14 @@ export default function HomePage() {
           <div className="bg-white border border-slate-100 p-8 rounded-2xl hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between">
             <div className="space-y-4">
               <div className="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-xl font-bold group-hover:bg-primary-600 group-hover:text-white transition-colors duration-300">
-                🚰
+                🩹
               </div>
-              <h3 className="font-extrabold text-slate-900 text-lg">Catheter Change</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">Sterile insertion, flushing, and management of Foley urinary catheter lines by trained clinical caregivers.</p>
+              <h3 className="font-extrabold text-slate-900 text-lg">Wound Dressing</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">Expert wound cleaning, dressing, post-operative stitch cleaning, and management under strict aseptic standards (Rs. 399).</p>
             </div>
             <div className="pt-6 mt-6 border-t border-slate-50">
-              <Link href="/services/urinary-catheter-change" className="inline-flex items-center text-xs text-primary-600 font-bold hover:gap-1.5 transition-all">
-                Read pricing & guidelines <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              <Link href="/services/wound-surgical-dressing" className="inline-flex items-center text-xs text-primary-600 font-bold hover:gap-1.5 transition-all">
+                Read details <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Link>
             </div>
           </div>
@@ -202,14 +202,14 @@ export default function HomePage() {
           <div className="bg-white border border-slate-100 p-8 rounded-2xl hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between">
             <div className="space-y-4">
               <div className="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-xl font-bold group-hover:bg-primary-600 group-hover:text-white transition-colors duration-300">
-                👵
+                🚰
               </div>
-              <h3 className="font-extrabold text-slate-900 text-lg">Dedicated Elder Nursing</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">12-hour or 24-hour continuous care for seniors recovering from stroke, paralysis, or neurological conditions.</p>
+              <h3 className="font-extrabold text-slate-900 text-lg">Urine Pipe Change</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">Safe and sterile urinary catheterization, insertion, cleaning, and urine pipe changes (Rs. 799).</p>
             </div>
             <div className="pt-6 mt-6 border-t border-slate-50">
-              <Link href="/services/dedicated-24-7-nursing" className="inline-flex items-center text-xs text-primary-600 font-bold hover:gap-1.5 transition-all">
-                Read pricing & guidelines <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              <Link href="/services/urinary-catheter-change" className="inline-flex items-center text-xs text-primary-600 font-bold hover:gap-1.5 transition-all">
+                Read details <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Link>
             </div>
           </div>
@@ -218,14 +218,14 @@ export default function HomePage() {
           <div className="bg-white border border-slate-100 p-8 rounded-2xl hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between">
             <div className="space-y-4">
               <div className="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-xl font-bold group-hover:bg-primary-600 group-hover:text-white transition-colors duration-300">
-                🤰
+                💧
               </div>
-              <h3 className="font-extrabold text-slate-900 text-lg">IVF Injection Support</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">Timely and clinical hormone injections for fertility treatments in the comfort of your home.</p>
+              <h3 className="font-extrabold text-slate-900 text-lg">IV Infusion & Saline</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">Home saline drip hydration, electrolyte management, nutrient fluids, and antibiotic IV lines administered safely.</p>
             </div>
             <div className="pt-6 mt-6 border-t border-slate-50">
-              <Link href="/services/at-home-ivf-support" className="inline-flex items-center text-xs text-primary-600 font-bold hover:gap-1.5 transition-all">
-                Read pricing & guidelines <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              <Link href="/services/iv-hydration-drip" className="inline-flex items-center text-xs text-primary-600 font-bold hover:gap-1.5 transition-all">
+                Read details <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Link>
             </div>
           </div>
@@ -234,14 +234,46 @@ export default function HomePage() {
           <div className="bg-white border border-slate-100 p-8 rounded-2xl hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between">
             <div className="space-y-4">
               <div className="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-xl font-bold group-hover:bg-primary-600 group-hover:text-white transition-colors duration-300">
-                🧘
+                🤰
               </div>
-              <h3 className="font-extrabold text-slate-900 text-lg">Physiotherapy Visits</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">Joint mobility, sports injury physical therapy, and neuro-physiotherapy by expert therapists.</p>
+              <h3 className="font-extrabold text-slate-900 text-lg">IVF Injection Support</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">Daily timed hormone therapy support and precise IVF injection administration in the comfort and privacy of your home.</p>
             </div>
             <div className="pt-6 mt-6 border-t border-slate-50">
-              <Link href="/services/physiotherapy-rehab" className="inline-flex items-center text-xs text-primary-600 font-bold hover:gap-1.5 transition-all">
-                Read pricing & guidelines <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              <Link href="/services/at-home-ivf-support" className="inline-flex items-center text-xs text-primary-600 font-bold hover:gap-1.5 transition-all">
+                Read details <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Card 7 */}
+          <div className="bg-white border border-slate-100 p-8 rounded-2xl hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between">
+            <div className="space-y-4">
+              <div className="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-xl font-bold group-hover:bg-primary-600 group-hover:text-white transition-colors duration-300">
+                🩺
+              </div>
+              <h3 className="font-extrabold text-slate-900 text-lg">Post-Surgical Care</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">Vitals monitoring, recovery assistance, medication coordination, and specialized nursing support following major surgeries.</p>
+            </div>
+            <div className="pt-6 mt-6 border-t border-slate-50">
+              <Link href="/services/post-surgical-care" className="inline-flex items-center text-xs text-primary-600 font-bold hover:gap-1.5 transition-all">
+                Read details <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Card 8 */}
+          <div className="bg-white border border-slate-100 p-8 rounded-2xl hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between">
+            <div className="space-y-4">
+              <div className="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-xl font-bold group-hover:bg-primary-600 group-hover:text-white transition-colors duration-300">
+                👵
+              </div>
+              <h3 className="font-extrabold text-slate-900 text-lg">24/7 Elder Nursing</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">Dedicated 12-hour or 24-hour home nursing service for complete geriatric medical support and long-term care (Rs. 2999/day).</p>
+            </div>
+            <div className="pt-6 mt-6 border-t border-slate-50">
+              <Link href="/services/dedicated-24-7-nursing" className="inline-flex items-center text-xs text-primary-600 font-bold hover:gap-1.5 transition-all">
+                Read details <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Link>
             </div>
           </div>
