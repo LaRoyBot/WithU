@@ -252,82 +252,55 @@ export default function HomePage() {
       <section className="bg-white py-20 px-6 border-y border-slate-100">
         <div className="max-w-6xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
-            <span className="text-xs font-extrabold text-primary-600 uppercase tracking-widest block">Our Caregivers</span>
-            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Meet Our Nursing Staff</h2>
-            <p className="text-sm text-slate-500 leading-relaxed">Compassionate, background-audited, and certified nurses representing our dedication to reliable medical support.</p>
+            <span className="text-xs font-extrabold text-primary-600 uppercase tracking-widest block">Our Team</span>
+            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Meet the key members of our organization</h2>
+            <p className="text-sm text-slate-500 leading-relaxed">Dedicated leadership guiding our clinical home nursing operations with experience and care.</p>
           </div>
 
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {/* Team 1 */}
-            <div className="bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 shadow-sm flex flex-col">
-              <div className="relative w-full aspect-[4/5] overflow-hidden">
+            <div className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center">
+              <div className="relative w-28 h-28 overflow-hidden rounded-full border border-slate-100 mb-6">
                 <Image
                   src="/images/original/team-1.jpg"
-                  alt="Sister Sreelekha"
+                  alt="Sunitha Yelamarthi"
                   fill
-                  className="object-cover hover:scale-102 transition-transform duration-300"
+                  className="object-cover"
                 />
               </div>
-              <div className="p-6 space-y-2 flex-1 flex flex-col justify-between">
-                <div>
-                  <h4 className="font-extrabold text-slate-900 text-base">Sister Sreelekha</h4>
-                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Certified GNM Nurse</p>
-                  <p className="text-xs text-slate-500 mt-2">Specialized in pediatric support, sterile dressing changes, and ICU care. 5+ years experience.</p>
-                </div>
-                <div className="pt-4 border-t border-slate-200/60 flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full">
-                    <CheckCircle2 className="w-3 h-3" /> Background Verified
-                  </span>
-                </div>
-              </div>
+              <h4 className="font-bold text-slate-900 text-lg mb-1">Sunitha Yelamarthi</h4>
+              <p className="text-sm text-slate-500 font-medium mb-1">CEO - Chief Executive Officer</p>
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">16+ Years Of Experience</p>
             </div>
 
             {/* Team 2 */}
-            <div className="bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 shadow-sm flex flex-col">
-              <div className="relative w-full aspect-[4/5] overflow-hidden">
+            <div className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center">
+              <div className="relative w-28 h-28 overflow-hidden rounded-full border border-slate-100 mb-6">
                 <Image
                   src="/images/original/team-2.jpg"
-                  alt="Brother Raju"
+                  alt="Mareswara Rao"
                   fill
-                  className="object-cover hover:scale-102 transition-transform duration-300"
+                  className="object-cover"
                 />
               </div>
-              <div className="p-6 space-y-2 flex-1 flex flex-col justify-between">
-                <div>
-                  <h4 className="font-extrabold text-slate-900 text-base">Brother Raju</h4>
-                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Senior Healthcare Caregiver</p>
-                  <p className="text-xs text-slate-500 mt-2">Expert in post-surgical patient handling, mobility assistance, and emergency vitals monitoring.</p>
-                </div>
-                <div className="pt-4 border-t border-slate-200/60 flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full">
-                    <CheckCircle2 className="w-3 h-3" /> Background Verified
-                  </span>
-                </div>
-              </div>
+              <h4 className="font-bold text-slate-900 text-lg mb-1">Mareswara Rao</h4>
+              <p className="text-sm text-slate-500 font-medium mb-1">CTO - Chief Technology Officer</p>
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Experienced</p>
             </div>
 
             {/* Team 3 */}
-            <div className="bg-slate-50 rounded-2xl overflow-hidden border border-slate-100 shadow-sm flex flex-col">
-              <div className="relative w-full aspect-[4/5] overflow-hidden">
+            <div className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center">
+              <div className="relative w-28 h-28 overflow-hidden rounded-full border border-slate-100 mb-6">
                 <Image
                   src="/images/original/team-3.jpg"
-                  alt="Sister Anjali"
+                  alt="Prabhakar Rao"
                   fill
-                  className="object-cover hover:scale-102 transition-transform duration-300"
+                  className="object-cover"
                 />
               </div>
-              <div className="p-6 space-y-2 flex-1 flex flex-col justify-between">
-                <div>
-                  <h4 className="font-extrabold text-slate-900 text-base">Sister Anjali</h4>
-                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Certified ANM Nurse</p>
-                  <p className="text-xs text-slate-500 mt-2">Specialized in geriatric/elderly care, medication schedules, and post-stroke rehabilitation support.</p>
-                </div>
-                <div className="pt-4 border-t border-slate-200/60 flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full">
-                    <CheckCircle2 className="w-3 h-3" /> Background Verified
-                  </span>
-                </div>
-              </div>
+              <h4 className="font-bold text-slate-900 text-lg mb-1">Prabhakar Rao</h4>
+              <p className="text-sm text-slate-500 font-medium mb-1">COO - Chief Operating Officer</p>
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">25+ Years Of Experience</p>
             </div>
           </div>
         </div>
