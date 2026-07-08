@@ -8,14 +8,14 @@ interface ServicePageProps {
 }
 
 const FALLBACK_SERVICES = [
-  { id: 'fallback-1', name: 'IM/IV Injection Support', slug: 'im-iv-injections', basePrice: 350.0, priceUnit: 'visit', description: 'Administration of intramuscular or intravenous injections by a certified nurse at your home.' },
-  { id: 'fallback-2', name: 'Wound & Surgical Dressing', slug: 'wound-surgical-dressing', basePrice: 450.0, priceUnit: 'visit', description: 'Sterile dressing changes for post-surgical wounds, diabetic ulcers, or other lacerations.' },
-  { id: 'fallback-3', name: 'Urinary Catheter Change', slug: 'urinary-catheter-change', basePrice: 600.0, priceUnit: 'visit', description: 'Hygienic insertion, removal, or replacement of urinary catheters.' },
-  { id: 'fallback-4', name: '24/7 Dedicated Nursing Care', slug: 'dedicated-24-7-nursing', basePrice: 2500.0, priceUnit: 'day', description: 'Continuous 24-hour round-the-clock shift nursing for critical or elderly patients.' },
-  { id: 'fallback-5', name: 'IV Infusion & Hydration Therapy', slug: 'iv-infusion-hydration', basePrice: 500.0, priceUnit: 'visit', description: 'Setup and monitoring of intravenous fluids, vitamins, or hydration therapy at home.' },
-  { id: 'fallback-6', name: 'At-Home IVF Injection Support', slug: 'at-home-ivf-support', basePrice: 400.0, priceUnit: 'visit', description: 'Scheduled daily hormone injections for IVF cycles administered timely by a nurse.' },
-  { id: 'fallback-7', name: 'Post-Surgical Nursing Care', slug: 'post-surgical-care', basePrice: 1500.0, priceUnit: 'day', description: '12-hour or 24-hour recovery assistance including vitals monitoring, medications, and support.' },
-  { id: 'fallback-8', name: 'Physiotherapy & Rehabilitation', slug: 'physiotherapy-rehab', basePrice: 800.0, priceUnit: 'visit', description: 'Home-based physical therapy exercises for stroke recovery, joint replacement, or mobility issues.' },
+  { id: 'fallback-1', name: 'IM/IV Injection Support', slug: 'im-iv-injections', basePrice: 350.0, priceUnit: 'visit', description: 'Administration of intramuscular or intravenous injections by a certified nurse at your home.', minimumDays: 1 },
+  { id: 'fallback-2', name: 'Wound & Surgical Dressing', slug: 'wound-surgical-dressing', basePrice: 450.0, priceUnit: 'visit', description: 'Sterile dressing changes for post-surgical wounds, diabetic ulcers, or other lacerations.', minimumDays: 1 },
+  { id: 'fallback-3', name: 'Urinary Catheter Change', slug: 'urinary-catheter-change', basePrice: 600.0, priceUnit: 'visit', description: 'Hygienic insertion, removal, or replacement of urinary catheters.', minimumDays: 1 },
+  { id: 'fallback-4', name: '24/7 Dedicated Nursing Care', slug: 'dedicated-24-7-nursing', basePrice: 2500.0, priceUnit: 'day', description: 'Continuous 24-hour round-the-clock shift nursing for critical or elderly patients.', minimumDays: 7 },
+  { id: 'fallback-5', name: 'IV Infusion & Hydration Therapy', slug: 'iv-infusion-hydration', basePrice: 500.0, priceUnit: 'visit', description: 'Setup and monitoring of intravenous fluids, vitamins, or hydration therapy at home.', minimumDays: 1 },
+  { id: 'fallback-6', name: 'At-Home IVF Injection Support', slug: 'at-home-ivf-support', basePrice: 400.0, priceUnit: 'visit', description: 'Scheduled daily hormone injections for IVF cycles administered timely by a nurse.', minimumDays: 1 },
+  { id: 'fallback-7', name: 'Post-Surgical Nursing Care', slug: 'post-surgical-care', basePrice: 1500.0, priceUnit: 'day', description: '12-hour or 24-hour recovery assistance including vitals monitoring, medications, and support.', minimumDays: 1 },
+  { id: 'fallback-8', name: 'Physiotherapy & Rehabilitation', slug: 'physiotherapy-rehab', basePrice: 800.0, priceUnit: 'visit', description: 'Home-based physical therapy exercises for stroke recovery, joint replacement, or mobility issues.', minimumDays: 1 },
 ];
 
 export const revalidate = 0;

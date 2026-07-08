@@ -117,7 +117,7 @@ export default function BookingDetailsForm({
               type="date"
               className={`input-field ${errors.startDate ? 'border-red-500' : ''}`}
               min={new Date().toISOString().split('T')[0]}
-              {register('startDate')}
+              {...register('startDate')}
             />
             {errors.startDate && <p className="text-xs text-red-600 mt-1">{errors.startDate.message}</p>}
           </div>
@@ -128,7 +128,7 @@ export default function BookingDetailsForm({
               type="date"
               className={`input-field ${errors.endDate ? 'border-red-500' : ''}`}
               min={startDate || new Date().toISOString().split('T')[0]}
-              {register('endDate')}
+              {...register('endDate')}
             />
             {errors.endDate && <p className="text-xs text-red-600 mt-1">{errors.endDate.message}</p>}
           </div>
@@ -137,7 +137,7 @@ export default function BookingDetailsForm({
             <label className="block text-xs font-medium text-gray-600 mb-1">Shift Duration</label>
             <select
               className={`input-field ${errors.shiftType ? 'border-red-500' : ''}`}
-              {register('shiftType')}
+              {...register('shiftType')}
             >
               <option value="DAY_12HR">12-Hour Shift (Day)</option>
               <option value="NIGHT_12HR">12-Hour Shift (Night)</option>
@@ -159,7 +159,7 @@ export default function BookingDetailsForm({
               type="text"
               placeholder="e.g. Ramesh Kumar"
               className={`input-field ${errors.customerName ? 'border-red-500' : ''}`}
-              {register('customerName')}
+              {...register('customerName')}
             />
             {errors.customerName && <p className="text-xs text-red-600 mt-1">{errors.customerName.message}</p>}
           </div>
@@ -172,7 +172,7 @@ export default function BookingDetailsForm({
                 type="tel"
                 placeholder="9876543210"
                 className={`input-field pl-12 ${errors.customerPhone ? 'border-red-500' : ''}`}
-                {register('customerPhone')}
+                {...register('customerPhone')}
               />
             </div>
             {errors.customerPhone && <p className="text-xs text-red-600 mt-1">{errors.customerPhone.message}</p>}
@@ -184,7 +184,7 @@ export default function BookingDetailsForm({
               type="text"
               placeholder="Flat 304, Green Meadows, Lingampally"
               className={`input-field ${errors.addressLine1 ? 'border-red-500' : ''}`}
-              {register('addressLine1')}
+              {...register('addressLine1')}
             />
             {errors.addressLine1 && <p className="text-xs text-red-600 mt-1">{errors.addressLine1.message}</p>}
           </div>
@@ -195,7 +195,7 @@ export default function BookingDetailsForm({
               type="text"
               placeholder="Near Lingampally Railway Station"
               className="input-field"
-              {register('addressLine2')}
+              {...register('addressLine2')}
             />
           </div>
 
@@ -206,7 +206,7 @@ export default function BookingDetailsForm({
               placeholder="500019"
               maxLength={6}
               className={`input-field ${errors.pincode ? 'border-red-500' : ''}`}
-              {register('pincode')}
+              {...register('pincode')}
             />
             {errors.pincode && <p className="text-xs text-red-600 mt-1">{errors.pincode.message}</p>}
           </div>
@@ -223,7 +223,7 @@ export default function BookingDetailsForm({
               type="text"
               placeholder="Patient Name"
               className={`input-field ${errors.patientName ? 'border-red-500' : ''}`}
-              {register('patientName')}
+              {...register('patientName')}
             />
             {errors.patientName && <p className="text-xs text-red-600 mt-1">{errors.patientName.message}</p>}
           </div>
@@ -234,7 +234,7 @@ export default function BookingDetailsForm({
               type="number"
               placeholder="Age"
               className={`input-field ${errors.patientAge ? 'border-red-500' : ''}`}
-              {register('patientAge')}
+              {...register('patientAge')}
             />
             {errors.patientAge && <p className="text-xs text-red-600 mt-1">{errors.patientAge.message}</p>}
           </div>
@@ -243,7 +243,7 @@ export default function BookingDetailsForm({
             <label className="block text-xs font-medium text-gray-600 mb-1">Patient Gender</label>
             <select
               className={`input-field ${errors.patientGender ? 'border-red-500' : ''}`}
-              {register('patientGender')}
+              {...register('patientGender')}
             >
               <option value="">Select Gender</option>
               <option value="Male">Male</option>
@@ -259,7 +259,7 @@ export default function BookingDetailsForm({
               rows={3}
               placeholder="Provide a brief summary of medical history, prescriptions, post-operative wounds, mobility status, or critical requirements."
               className={`input-field h-20 resize-none ${errors.medicalConditions ? 'border-red-500' : ''}`}
-              {register('medicalConditions')}
+              {...register('medicalConditions')}
             />
             {errors.medicalConditions && <p className="text-xs text-red-600 mt-1">{errors.medicalConditions.message}</p>}
           </div>
@@ -270,7 +270,7 @@ export default function BookingDetailsForm({
               type="text"
               placeholder="e.g. IV drip setup available, nurse must speak Telugu"
               className="input-field"
-              {register('specialInstructions')}
+              {...register('specialInstructions')}
             />
           </div>
         </div>
@@ -290,7 +290,7 @@ export default function BookingDetailsForm({
             type="checkbox"
             id="consentGiven"
             className="w-4 h-4 rounded text-primary-600 border-gray-300 focus:ring-primary-500 mt-0.5"
-            {register('consentGiven')}
+            {...register('consentGiven')}
           />
           <label htmlFor="consentGiven" className="text-xs text-gray-500 leading-normal">
             I explicitly consent to Neetha Nursing Service processing my contact details and the patient's medical history to coordinate at-home care. I understand this clinical data will be stored securely and processed in compliance with the Digital Personal Data Protection (DPDP) Act, 2023.

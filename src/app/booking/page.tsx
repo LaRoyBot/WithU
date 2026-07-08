@@ -45,7 +45,7 @@ const FALLBACK_SERVICES = [
 export const revalidate = 0; // Disable cache to reflect dynamic DB additions
 
 export default async function SelectServicePage() {
-  let services = [];
+  let services: any[] = [];
   try {
     services = await prisma.service.findMany({
       where: { isActive: true },
