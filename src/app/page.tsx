@@ -82,7 +82,7 @@ export default function HomePage() {
               Professional nursing care, in your own <span className="text-primary-600 font-serif font-semibold italic">comfort home.</span>
             </h1>
 
-            <p className="text-sm sm:text-base text-slate-500 max-w-xl leading-relaxed">
+            <p className="text-base sm:text-lg text-slate-600 font-medium max-w-xl leading-relaxed">
               Operating across Lingampally & Miyapur, Hyderabad since 2015. We bring certified, background-verified caregivers to your doorstep for injections, dressings, post-surgical recovery, and dedicated elderly support.
             </p>
 
