@@ -4,10 +4,7 @@ const ALGORITHM = 'aes-256-gcm';
 // Fallback key for testing/dev (must be 32 bytes / 64 hex characters)
 const DEFAULT_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 
-function getEncryptionKey(): Buffer {
-  const keyHex = process.env.ENCRYPTION_KEY || DEFAULT_KEY;
-  return Buffer.from(keyHex, 'hex');
-}
+const getEncryptionKey = (): Buffer => Buffer.from(process.env.ENCRYPTION_KEY || DEFAULT_KEY, 'hex');
 
 /**
  * Encrypts a string using AES-256-GCM

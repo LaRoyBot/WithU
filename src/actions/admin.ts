@@ -6,10 +6,6 @@ import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache'; // Next.js 15 cache revalidation API
 import { sendNurseAssignment, sendBookingCompleted } from '@/lib/whatsapp';
 
-function hashPassword(password: string): string {
-  return createHash('sha256').update(password).digest('hex');
-}
-
 /**
  * Log in admin and set secure session cookie
  */
@@ -30,7 +26,7 @@ export async function adminLogin(formData: FormData) {
       return { error: 'Invalid email or password' };
     }
 
-    const hashedInput = hashPassword(password);
+    const hashedInput = createHash('sha256').update(password).digest('hex');
     if (admin.passwordHash !== hashedInput) {
       return { error: 'Invalid email or password' };
     }

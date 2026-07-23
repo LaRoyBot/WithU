@@ -7,14 +7,7 @@ import { sendBookingConfirmation } from '@/lib/whatsapp';
 import { redirect } from 'next/navigation';
 
 // Helper to generate a random 4-character uppercase alphanumeric string for booking ID suffix
-function generateBookingNumber(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-  for (let i = 0; i < 4; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return `NNS-${result}`;
-}
+const generateBookingNumber = (): string => `NNS-${Array.from({ length: 4 }, () => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[Math.floor(Math.random() * 36)]).join('')}`;
 
 /**
  * Step 2 Form Submission Server Action

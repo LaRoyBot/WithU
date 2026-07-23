@@ -28,12 +28,7 @@ export default async function AdminReportsPage() {
       _count: { id: true },
     });
 
-    statusCounts.forEach((group) => {
-      const statusKey = group.status as keyof typeof bookingsByStatus;
-      if (statusKey in bookingsByStatus) {
-        bookingsByStatus[statusKey] = group._count.id;
-      }
-    });
+    statusCounts.forEach(g => { if (g.status in bookingsByStatus) bookingsByStatus[g.status as keyof typeof bookingsByStatus] = g._count.id; });
 
     // 3. Calculate completion rate: Completed / (Completed + Cancelled)
     const completed = bookingsByStatus.COMPLETED;
