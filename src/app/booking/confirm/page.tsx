@@ -34,7 +34,7 @@ export default async function ConfirmPage({ searchParams }: ConfirmPageProps) {
       bookingNumber: 'NNS-MOCK',
       totalAmount: 1800.0,
       customer: {
-        phone: '+919876543210',
+        phone: '+918341069693',
       },
     };
   }

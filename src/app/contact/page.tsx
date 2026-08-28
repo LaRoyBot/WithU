@@ -22,13 +22,13 @@ export default function ContactPage() {
           <div className="bg-white rounded-xl border border-gray-100 p-6 space-y-4 text-gray-600">
             <div>
               <span className="font-bold text-gray-900 text-sm block">Support Desk</span>
-              <p className="mt-1">📞 Call Center: +91 98765 43210</p>
-              <p className="mt-1">💬 WhatsApp Chat: +91 98765 43210</p>
+              <p className="mt-1">📞 Call Center: +91 8341069693 / +91 9397925412</p>
+              <p className="mt-1">💬 WhatsApp Chat: +91 8341069693</p>
             </div>
             <div>
               <span className="font-bold text-gray-900 text-sm block">Registered Office</span>
               <p className="mt-1">Neetha Nursing Service Clinic,</p>
-              <p>Main Road, Lingampally,</p>
+              <p>Main Road, Lingampally & Gachibowli,</p>
               <p>Hyderabad, Telangana, 500019</p>
             </div>
             <div>
@@ -47,7 +47,7 @@ export default function ContactPage() {
               </p>
             </div>
             <a
-              href="https://wa.me/919876543210"
+              href="https://wa.me/918341069693"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full inline-flex justify-center items-center py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow-sm transition-colors text-center"

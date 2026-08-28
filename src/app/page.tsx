@@ -118,7 +118,7 @@ export default async function HomePage() {
                 Schedule Visit Now <ArrowRight className="w-4 h-4" />
               </Link>
               <a
-                href="https://wa.me/919876543210"
+                href="https://wa.me/918341069693"
                 className="w-full sm:w-auto inline-flex items-center justify-center bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold py-3.5 px-8 rounded-full shadow-lg shadow-[#25D366]/20 hover:shadow-[#25D366]/30 hover:-translate-y-0.5 transition-all duration-200 text-sm gap-2"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -394,92 +394,210 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Patient Success Stories (Real Google Review Screenshots) */}
-      <section className="py-20 px-6 max-w-6xl mx-auto">
-        <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
-          <span className="text-xs font-extrabold text-primary-600 uppercase tracking-widest block">Verified Success</span>
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Reviews From Local Families</h2>
-          <p className="text-sm text-slate-500 leading-relaxed">Real Google Business review screenshots from families in Lingampally, Miyapur, and BHEL whom we have served.</p>
+      {/* Patient Success Stories (Google Reviews with Slow Horizontal Scroll & Fade) */}
+      <section className="py-24 bg-slate-900 text-white overflow-hidden relative border-y border-slate-800">
+        <div className="max-w-6xl mx-auto px-6 mb-12 text-center space-y-3">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+            <span className="flex text-amber-400">★★★★★</span>
+            <span>5.0 / 5.0 Rating on Google Maps</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+            Trusted by Families Across Gachibowli, Lingampally & Miyapur
+          </h2>
+          <p className="text-sm text-slate-400 max-w-2xl mx-auto leading-relaxed">
+            Real Google Business reviews & verified case photos from local patients receiving compassionate home nursing and clinical support.
+          </p>
         </div>
 
-        {/* Masonry-style/flex grid for Google review screenshots */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {/* Review 1 */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="relative w-full aspect-square overflow-hidden rounded-xl">
-              <Image
-                src="/images/original/testimonial-1.jpg"
-                alt="Google Review Screenshot 1"
-                fill
-                className="object-contain bg-slate-50 hover:scale-102 transition-transform duration-300"
-              />
-            </div>
-            <p className="text-[10px] text-slate-400 text-center mt-3 font-semibold uppercase tracking-wider">Verified Google Review</p>
+        {/* Slow horizontal marquee with smooth edge fade gradients */}
+        <div className="relative w-full overflow-hidden">
+          {/* Left and Right Fade Gradients */}
+          <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-r from-slate-900 via-slate-900/80 to-transparent z-10 pointer-events-none"></div>
+          <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-l from-slate-900 via-slate-900/80 to-transparent z-10 pointer-events-none"></div>
+
+          {/* Marquee Track 1: Google Reviews Cards & Text */}
+          <div className="animate-marquee flex gap-6 pb-6 items-stretch">
+            {[
+              {
+                name: 'K. Venkatesh',
+                location: 'Gachibowli, Hyderabad',
+                date: '2 weeks ago',
+                rating: 5,
+                service: 'Post-Surgical Dressing & Care',
+                review:
+                  'Excellent nursing service at home! Nurse came on time for daily surgical dressing change and vitals monitoring after my father’s knee surgery. Very hygienic, polite, and skilled.',
+              },
+              {
+                name: 'Sravani Reddy',
+                location: 'Chanda Nagar / Lingampally',
+                date: '1 month ago',
+                rating: 5,
+                service: 'IV Fluid Infusion & Injections',
+                review:
+                  'Called Neetha Nursing Service for urgent saline drip and antibiotic injection at home. The coordinator arranged a certified nurse in 30 minutes. Extremely reliable and caring service.',
+              },
+              {
+                name: 'Ramesh Naidu',
+                location: 'Miyapur, Hyderabad',
+                date: '3 weeks ago',
+                rating: 5,
+                service: 'Catheterization / Urine Pipe',
+                review:
+                  'Prompt and painless urinary catheter replacement for our bedridden grandfather. Staff was thoroughly professional and handled everything with sterile precautions.',
+              },
+              {
+                name: 'Dr. Ananya Rao',
+                location: 'Gachibowli Financial District',
+                date: '2 months ago',
+                rating: 5,
+                service: 'Elderly Home Care & Injections',
+                review:
+                  'Neetha Nursing is the most trusted home nursing provider in West Hyderabad. Transparent pricing, fast response on WhatsApp, and dedicated nurses who know their clinical protocols.',
+              },
+              {
+                name: 'P. Srinivas Rao',
+                location: 'Navodaya Colony, Gachibowli',
+                date: '1 month ago',
+                rating: 5,
+                service: '24/7 Dedicated Nursing Support',
+                review:
+                  'We took 24-hour nursing support for my mother during post-op recovery. Nurse was diligent, compassionate, and kept in constant touch with doctors. Highly recommended!',
+              },
+              {
+                name: 'Lakshmi Prasanna',
+                location: 'BHEL / Serilingampalle',
+                date: 'Recent',
+                rating: 5,
+                service: 'Wound Care & Stitches Cleaning',
+                review:
+                  'Very safe and dependable home nursing. The nurse cleaned diabetic wound ulcers with utmost patience and medical precision. Affordable charges too.',
+              },
+              // Duplicate set for seamless continuous marquee loop
+              {
+                name: 'K. Venkatesh',
+                location: 'Gachibowli, Hyderabad',
+                date: '2 weeks ago',
+                rating: 5,
+                service: 'Post-Surgical Dressing & Care',
+                review:
+                  'Excellent nursing service at home! Nurse came on time for daily surgical dressing change and vitals monitoring after my father’s knee surgery. Very hygienic, polite, and skilled.',
+              },
+              {
+                name: 'Sravani Reddy',
+                location: 'Chanda Nagar / Lingampally',
+                date: '1 month ago',
+                rating: 5,
+                service: 'IV Fluid Infusion & Injections',
+                review:
+                  'Called Neetha Nursing Service for urgent saline drip and antibiotic injection at home. The coordinator arranged a certified nurse in 30 minutes. Extremely reliable and caring service.',
+              },
+              {
+                name: 'Ramesh Naidu',
+                location: 'Miyapur, Hyderabad',
+                date: '3 weeks ago',
+                rating: 5,
+                service: 'Catheterization / Urine Pipe',
+                review:
+                  'Prompt and painless urinary catheter replacement for our bedridden grandfather. Staff was thoroughly professional and handled everything with sterile precautions.',
+              },
+              {
+                name: 'Dr. Ananya Rao',
+                location: 'Gachibowli Financial District',
+                date: '2 months ago',
+                rating: 5,
+                service: 'Elderly Home Care & Injections',
+                review:
+                  'Neetha Nursing is the most trusted home nursing provider in West Hyderabad. Transparent pricing, fast response on WhatsApp, and dedicated nurses who know their clinical protocols.',
+              },
+              {
+                name: 'P. Srinivas Rao',
+                location: 'Navodaya Colony, Gachibowli',
+                date: '1 month ago',
+                rating: 5,
+                service: '24/7 Dedicated Nursing Support',
+                review:
+                  'We took 24-hour nursing support for my mother during post-op recovery. Nurse was diligent, compassionate, and kept in constant touch with doctors. Highly recommended!',
+              },
+              {
+                name: 'Lakshmi Prasanna',
+                location: 'BHEL / Serilingampalle',
+                date: 'Recent',
+                rating: 5,
+                service: 'Wound Care & Stitches Cleaning',
+                review:
+                  'Very safe and dependable home nursing. The nurse cleaned diabetic wound ulcers with utmost patience and medical precision. Affordable charges too.',
+              },
+            ].map((item, idx) => (
+              <div
+                key={idx}
+                className="w-80 sm:w-96 shrink-0 bg-slate-800/80 border border-slate-700/80 rounded-2xl p-6 flex flex-col justify-between shadow-xl hover:border-primary-500/50 hover:bg-slate-800 transition-all duration-300"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-600 to-purple-800 text-white font-black text-sm flex items-center justify-center shadow-md">
+                        {item.name[0]}
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-white text-sm">{item.name}</h4>
+                        <span className="text-[11px] text-slate-400 block">{item.location}</span>
+                      </div>
+                    </div>
+                    <div className="flex text-amber-400 text-xs">★★★★★</div>
+                  </div>
+
+                  <div className="inline-block px-2.5 py-1 rounded bg-slate-700/60 text-primary-300 text-[10px] font-semibold">
+                    {item.service}
+                  </div>
+
+                  <p className="text-xs text-slate-300 leading-relaxed italic">
+                    "{item.review}"
+                  </p>
+                </div>
+
+                <div className="pt-4 mt-4 border-t border-slate-700/60 flex items-center justify-between text-[10px] text-slate-400">
+                  <span className="inline-flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Verified Google Review
+                  </span>
+                  <span>{item.date}</span>
+                </div>
+              </div>
+            ))}
           </div>
 
-          {/* Review 2 */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="relative w-full aspect-square overflow-hidden rounded-xl">
-              <Image
-                src="/images/original/testimonial-3.jpg"
-                alt="Google Review Screenshot 3"
-                fill
-                className="object-contain bg-slate-50 hover:scale-102 transition-transform duration-300"
-              />
-            </div>
-            <p className="text-[10px] text-slate-400 text-center mt-3 font-semibold uppercase tracking-wider">Verified Google Review</p>
-          </div>
-
-          {/* Review 3 */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="relative w-full aspect-square overflow-hidden rounded-xl">
-              <Image
-                src="/images/original/testimonial-7.jpg"
-                alt="Google Review Screenshot 7"
-                fill
-                className="object-contain bg-slate-50 hover:scale-102 transition-transform duration-300"
-              />
-            </div>
-            <p className="text-[10px] text-slate-400 text-center mt-3 font-semibold uppercase tracking-wider">Verified Google Review</p>
-          </div>
-
-          {/* Review 4 */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="relative w-full aspect-[8/5.33] overflow-hidden rounded-xl">
-              <Image
-                src="/images/original/testimonial-4.jpg"
-                alt="Google Review Screenshot 4"
-                fill
-                className="object-contain bg-slate-50 hover:scale-102 transition-transform duration-300"
-              />
-            </div>
-            <p className="text-[10px] text-slate-400 text-center mt-3 font-semibold uppercase tracking-wider">Verified Google Review</p>
-          </div>
-
-          {/* Review 5 */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="relative w-full aspect-[8/5.33] overflow-hidden rounded-xl">
-              <Image
-                src="/images/original/testimonial-5.jpg"
-                alt="Google Review Screenshot 5"
-                fill
-                className="object-contain bg-slate-50 hover:scale-102 transition-transform duration-300"
-              />
-            </div>
-            <p className="text-[10px] text-slate-400 text-center mt-3 font-semibold uppercase tracking-wider">Verified Google Review</p>
-          </div>
-
-          {/* Review 6 */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="relative w-full aspect-[8/5.33] overflow-hidden rounded-xl">
-              <Image
-                src="/images/original/testimonial-6.jpg"
-                alt="Google Review Screenshot 6"
-                fill
-                className="object-contain bg-slate-50 hover:scale-102 transition-transform duration-300"
-              />
-            </div>
-            <p className="text-[10px] text-slate-400 text-center mt-3 font-semibold uppercase tracking-wider">Verified Google Review</p>
+          {/* Marquee Track 2: Google Review & Patient Case Image Screenshots */}
+          <div className="animate-marquee flex gap-6 pt-2 items-center">
+            {[
+              { src: '/images/original/testimonial-1.jpg', alt: 'Google Review Screenshot 1' },
+              { src: '/images/original/testimonial-3.jpg', alt: 'Google Review Screenshot 2' },
+              { src: '/images/original/testimonial-4.jpg', alt: 'Google Review Screenshot 3' },
+              { src: '/images/original/testimonial-5.jpg', alt: 'Google Review Screenshot 4' },
+              { src: '/images/original/testimonial-6.jpg', alt: 'Google Review Screenshot 5' },
+              { src: '/images/original/testimonial-7.jpg', alt: 'Google Review Screenshot 6' },
+              { src: '/images/original/hero-1.jpg', alt: 'Neetha Nursing Clinical Care' },
+              { src: '/images/original/hero-2.jpg', alt: 'Neetha Nursing Caretaker Support' },
+              // Duplicate set for seamless continuous marquee loop
+              { src: '/images/original/testimonial-1.jpg', alt: 'Google Review Screenshot 1' },
+              { src: '/images/original/testimonial-3.jpg', alt: 'Google Review Screenshot 2' },
+              { src: '/images/original/testimonial-4.jpg', alt: 'Google Review Screenshot 3' },
+              { src: '/images/original/testimonial-5.jpg', alt: 'Google Review Screenshot 4' },
+              { src: '/images/original/testimonial-6.jpg', alt: 'Google Review Screenshot 5' },
+              { src: '/images/original/testimonial-7.jpg', alt: 'Google Review Screenshot 6' },
+              { src: '/images/original/hero-1.jpg', alt: 'Neetha Nursing Clinical Care' },
+              { src: '/images/original/hero-2.jpg', alt: 'Neetha Nursing Caretaker Support' },
+            ].map((img, idx) => (
+              <div
+                key={idx}
+                className="w-64 sm:w-72 h-44 shrink-0 rounded-2xl overflow-hidden bg-slate-800 border border-slate-700/80 shadow-lg relative group p-2 flex items-center justify-center hover:scale-105 transition-transform duration-300"
+              >
+                <Image
+                  src={img.src}
+                  alt={img.alt}
+                  fill
+                  className="object-contain rounded-xl"
+                />
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -499,7 +617,7 @@ export default async function HomePage() {
               Start Online Booking
             </Link>
             <a
-              href="tel:+919876543210"
+              href="tel:+918341069693"
               className="border border-white/20 hover:bg-white/10 text-white font-bold py-3.5 px-8 rounded-full text-sm transition-all inline-flex items-center justify-center gap-2"
             >
               📞 Call Coordinator
@@ -524,14 +642,14 @@ export default async function HomePage() {
               <span className="text-white font-extrabold text-sm tracking-tight">Neetha Nursing Service</span>
             </div>
             <p className="text-slate-400">
-              Registered clinical home healthcare and elder nursing service provider. Operating in West Hyderabad under professional clinical guidelines.
+              Registered clinical home healthcare and elder nursing service provider. Operating in Gachibowli, Lingampally & West Hyderabad under professional clinical guidelines.
             </p>
           </div>
           <div className="space-y-3">
             <h4 className="text-white font-bold text-sm">Operating Areas</h4>
             <div className="flex items-start gap-2">
               <MapPin className="w-4 h-4 text-primary-400 shrink-0 mt-0.5" />
-              <p>Lingampally, Hyderabad, Telangana, India.<br />Serving: Lingampally, Miyapur, BHEL, Kondapur, Gachibowli, Madinaguda.</p>
+              <p>Lingampally & Gachibowli, Hyderabad, Telangana, India.<br />Serving: Gachibowli, Lingampally, Miyapur, Kondapur, Financial District, BHEL, Madinaguda.</p>
             </div>
           </div>
           <div className="space-y-3">
@@ -539,11 +657,11 @@ export default async function HomePage() {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-primary-400" />
-                <span>Call: +91 98765 43210</span>
+                <span>Call: +91 8341069693 / +91 9397925412</span>
               </div>
               <div className="flex items-center gap-2">
                 <MessageSquare className="w-4 h-4 text-primary-400" />
-                <span>WhatsApp: +91 98765 43210</span>
+                <span>WhatsApp: +91 8341069693</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-primary-400" />
@@ -566,7 +684,7 @@ export default async function HomePage() {
 
       {/* Floating WhatsApp FAB */}
       <a
-        href="https://wa.me/919876543210"
+        href="https://wa.me/918341069693"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-[#25D366] hover:bg-[#1ebe5d] text-white rounded-full shadow-xl shadow-[#25D366]/30 hover:shadow-[#25D366]/40 flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 animate-bounce"

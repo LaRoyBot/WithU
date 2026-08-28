@@ -136,7 +136,7 @@ export async function sendAdminNewBookingAlert(details: {
   message?: string;
   hasPrescription: boolean;
 }) {
-  const adminPhone = process.env.ADMIN_WHATSAPP_PHONE || '+919876543210';
+  const adminPhone = process.env.ADMIN_WHATSAPP_PHONE || '+918341069693';
   const formattedPhone = adminPhone.startsWith('+') ? adminPhone : `+91${adminPhone}`;
 
   return callWhatsAppApi({
