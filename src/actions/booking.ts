@@ -3,15 +3,181 @@
 import { prisma } from '@/lib/prisma';
 import { encrypt, decrypt } from '@/lib/crypto';
 import { bookingDetailsSchema, type BookingDetailsInput } from '@/lib/validations/booking';
-import { sendBookingConfirmation } from '@/lib/whatsapp';
-import { redirect } from 'next/navigation';
+import { sendBookingConfirmation, sendAdminNewBookingAlert } from '@/lib/whatsapp';
+import { revalidatePath } from 'next/cache';
 
 // Helper to generate a random 4-character uppercase alphanumeric string for booking ID suffix
-const generateBookingNumber = (): string => `NNS-${Array.from({ length: 4 }, () => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[Math.floor(Math.random() * 36)]).join('')}`;
+const generateBookingNumber = (): string =>
+  `NNS-${Array.from({ length: 4 }, () => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[Math.floor(Math.random() * 36)]).join('')}`;
 
 /**
- * Step 2 Form Submission Server Action
- * Validates inputs, creates customer, encrypts health PII, and creates a pending booking.
+ * Flow 5: Public Two-Step Booking Form Server Action
+ * Handles Step 1 & Step 2 complete payload, stores encrypted health data,
+ * and automatically dispatches the lead packet to Admin's WhatsApp.
+ */
+export async function submitPublicBooking(data: {
+  name: string;
+  phone: string;
+  area: string;
+  serviceId: string;
+  message?: string;
+  prescriptionUrl?: string;
+  promoCode?: string;
+}) {
+  if (!data.name?.trim() || !data.phone?.trim() || !data.serviceId) {
+    return { success: false, error: 'Name, phone number, and service selection are required.' };
+  }
+
+  // Normalize phone number to E.164 (+91)
+  const rawPhone = data.phone.replace(/\D/g, '');
+  if (rawPhone.length < 10) {
+    return { success: false, error: 'Please enter a valid 10-digit Indian phone number.' };
+  }
+  const cleanPhone = rawPhone.length === 10 ? `+91${rawPhone}` : (data.phone.startsWith('+') ? data.phone : `+${rawPhone}`);
+
+  try {
+    // 1. Fetch Service and compute initial price
+    const service = await prisma.service.findUnique({
+      where: { id: data.serviceId },
+    });
+
+    if (!service || !service.isActive) {
+      return { success: false, error: 'The selected nursing service is currently inactive or unavailable.' };
+    }
+
+    let calculatedPrice = Number(service.basePrice);
+
+    // Apply promo code discount if valid
+    if (data.promoCode && data.promoCode.trim().toUpperCase() === 'WITHU10') {
+      calculatedPrice = Math.max(0, calculatedPrice * 0.9); // 10% discount
+    }
+
+    // 2. Upsert Customer Record
+    const customer = await prisma.customer.upsert({
+      where: { phone: cleanPhone },
+      update: {
+        name: data.name.trim(),
+        addressLine1: data.area?.trim() || 'Hyderabad Area',
+        consentGiven: true,
+        consentTimestamp: new Date(),
+        consentIpAddress: '127.0.0.1',
+        consentVersion: 'v1.0-dpdp',
+      },
+      create: {
+        name: data.name.trim(),
+        phone: cleanPhone,
+        addressLine1: data.area?.trim() || 'Hyderabad Area',
+        pincode: '500001',
+        consentGiven: true,
+        consentTimestamp: new Date(),
+        consentIpAddress: '127.0.0.1',
+        consentVersion: 'v1.0-dpdp',
+      },
+    });
+
+    // 3. Generate unique booking number
+    let bookingNumber = generateBookingNumber();
+    let isUnique = false;
+    let attempts = 0;
+    while (!isUnique && attempts < 5) {
+      const existing = await prisma.booking.findUnique({
+        where: { bookingNumber },
+      });
+      if (!existing) {
+        isUnique = true;
+      } else {
+        bookingNumber = generateBookingNumber();
+        attempts++;
+      }
+    }
+
+    // 4. Encrypt Clinical/Sensitive PHI
+    const encryptedPatientName = encrypt(data.name.trim());
+    const encryptedConditions = encrypt(
+      `Area/Location: ${data.area || 'Hyderabad'}. User Request: ${data.message || 'No additional message'}`
+    );
+    const encryptedInstructions = data.message ? encrypt(data.message) : null;
+
+    const startDate = new Date();
+    const endDate = new Date(Date.now() + 24 * 60 * 60 * 1000); // 1-day minimum
+
+    // 5. Create Booking in CONFIRMED state for Admin queue & Open Job Board
+    const booking = await prisma.booking.create({
+      data: {
+        bookingNumber,
+        customerId: customer.id,
+        serviceId: service.id,
+        startDate,
+        endDate,
+        shiftType: 'DAY_12HR',
+        totalDays: 1,
+        totalAmount: calculatedPrice,
+        area: data.area?.trim() || 'Hyderabad',
+        promoCode: data.promoCode?.trim() || null,
+        prescriptionUrl: data.prescriptionUrl || null,
+        patientName: encryptedPatientName,
+        patientAge: 45, // default
+        patientGender: 'Other',
+        medicalConditions: encryptedConditions,
+        specialInstructions: encryptedInstructions,
+        status: 'CONFIRMED', // Immediately placed in open job board / queue
+      },
+    });
+
+    // 6. Write status event audit
+    await prisma.bookingStatusEvent.create({
+      data: {
+        bookingId: booking.id,
+        fromStatus: 'PENDING_OTP',
+        toStatus: 'CONFIRMED',
+        notes: `Public 2-step booking submitted by customer. Area: ${data.area || 'Hyderabad'}, Promo: ${data.promoCode || 'None'}`,
+      },
+    });
+
+    // 7. Automated Forwarding to Admin WhatsApp
+    try {
+      await sendAdminNewBookingAlert({
+        bookingNumber,
+        customerName: data.name.trim(),
+        customerPhone: cleanPhone,
+        area: data.area?.trim() || 'Hyderabad',
+        serviceName: service.name,
+        price: calculatedPrice,
+        promoCode: data.promoCode?.trim(),
+        message: data.message?.trim(),
+        hasPrescription: !!data.prescriptionUrl,
+      });
+    } catch (waErr) {
+      console.warn('Admin WhatsApp dispatch error (logged safely):', waErr);
+    }
+
+    // 8. Send immediate acknowledgement to customer
+    try {
+      await sendBookingConfirmation(cleanPhone, data.name.trim(), bookingNumber, service.name);
+    } catch (custWaErr) {
+      console.warn('Customer WhatsApp acknowledgement error:', custWaErr);
+    }
+
+    revalidatePath('/admin');
+    revalidatePath('/employee');
+
+    return {
+      success: true,
+      bookingId: booking.id,
+      bookingNumber,
+      customerName: data.name.trim(),
+      customerPhone: cleanPhone,
+      serviceName: service.name,
+      totalAmount: calculatedPrice,
+    };
+  } catch (err: any) {
+    console.error('Public booking submission error:', err);
+    return { success: false, error: 'A server error occurred while processing your booking. Please try again.' };
+  }
+}
+
+/**
+ * Step 2 Form Submission Server Action (Legacy / Multi-day Full Onboarding)
  */
 export async function createBookingRecord(input: BookingDetailsInput) {
   // 1. Validate Form Input
@@ -50,7 +216,6 @@ export async function createBookingRecord(input: BookingDetailsInput) {
     const totalAmount = Number(service.basePrice) * totalDays;
 
     // 3. Upsert Customer
-    // Phone is unique, so we search by phone.
     const customer = await prisma.customer.upsert({
       where: { phone: data.customerPhone },
       update: {
@@ -61,7 +226,7 @@ export async function createBookingRecord(input: BookingDetailsInput) {
         pincode: data.pincode,
         consentGiven: true,
         consentTimestamp: new Date(),
-        consentIpAddress: '127.0.0.1', // Mock IP
+        consentIpAddress: '127.0.0.1',
         consentVersion: 'v1.0-dpdp',
       },
       create: {
@@ -82,9 +247,7 @@ export async function createBookingRecord(input: BookingDetailsInput) {
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes expiration
 
-    // 5. Encrypt Sensitive Clinical Data (PHI) at the Application Level
-    // We encrypt Patient Name, Medical Conditions, and Special Instructions.
-    // Customer Name and Phone remain unencrypted for admin panel searching/indexing.
+    // 5. Encrypt Sensitive Clinical Data (PHI)
     const encryptedPatientName = encrypt(data.patientName);
     const encryptedMedicalConditions = encrypt(data.medicalConditions);
     const encryptedSpecialInstructions = data.specialInstructions ? encrypt(data.specialInstructions) : null;
@@ -127,7 +290,6 @@ export async function createBookingRecord(input: BookingDetailsInput) {
       },
     });
 
-    // Log the OTP in server console for local testing (mocking SMS delivery)
     console.log(`[SMS OTP SERVICE MOCK] OTP for booking ${bookingNumber} (Phone: ${data.customerPhone}) is: ${otpCode}`);
 
     return { success: true, bookingId: booking.id };
@@ -139,7 +301,6 @@ export async function createBookingRecord(input: BookingDetailsInput) {
 
 /**
  * Step 3: Verify OTP Server Action
- * Validates the entered OTP code and transitions booking status to CONFIRMED.
  */
 export async function verifyBookingOtp(bookingId: string, otpCode: string) {
   if (!bookingId || !otpCode) {
@@ -179,7 +340,6 @@ export async function verifyBookingOtp(bookingId: string, otpCode: string) {
           otpExpires: null,
         },
       }),
-      // Write Status Audit Log
       prisma.bookingStatusEvent.create({
         data: {
           bookingId: booking.id,
@@ -190,7 +350,6 @@ export async function verifyBookingOtp(bookingId: string, otpCode: string) {
       }),
     ]);
 
-    // Send WhatsApp notification
     await sendBookingConfirmation(
       booking.customer.phone,
       booking.customer.name,
@@ -207,7 +366,6 @@ export async function verifyBookingOtp(bookingId: string, otpCode: string) {
 
 /**
  * Step 3: Resend OTP Server Action
- * Regenerates code, updates expires, and logs mock SMS message.
  */
 export async function resendBookingOtp(bookingId: string) {
   try {
@@ -221,7 +379,7 @@ export async function resendBookingOtp(bookingId: string) {
     }
 
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes expiration
+    const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
 
     await prisma.booking.update({
       where: { id: bookingId },
@@ -241,8 +399,7 @@ export async function resendBookingOtp(bookingId: string) {
 }
 
 /**
- * Simplified Booking Form Submission Server Action
- * Creates Customer, Encrypts PHI, and places booking directly into CONFIRMED status.
+ * Simplified Booking Form Submission Server Action (Legacy fallback)
  */
 export async function createQuickBooking(data: {
   name: string;
@@ -252,118 +409,11 @@ export async function createQuickBooking(data: {
   dateNeeded: string;
   message: string;
 }) {
-  if (!data.name || !data.phone || !data.serviceId || !data.dateNeeded) {
-    return { success: false, error: 'Please fill in all required fields' };
-  }
-
-  // Normalize phone (E.164 format)
-  const phone = data.phone.startsWith('+91')
-    ? data.phone
-    : (data.phone.startsWith('+') ? data.phone : `+91${data.phone}`);
-
-  try {
-    // 1. Fetch Service to calculate pricing
-    const service = await prisma.service.findUnique({
-      where: { id: data.serviceId },
-    });
-
-    if (!service || !service.isActive) {
-      return { success: false, error: 'The selected service is currently unavailable.' };
-    }
-
-    const start = new Date(data.dateNeeded);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(data.dateNeeded);
-    end.setHours(23, 59, 59, 999);
-
-    const totalDays = 1;
-    const totalAmount = Number(service.basePrice);
-
-    // 2. Upsert Customer
-    const customer = await prisma.customer.upsert({
-      where: { phone },
-      update: {
-        name: data.name,
-        consentGiven: true,
-        consentTimestamp: new Date(),
-        consentIpAddress: '127.0.0.1',
-        consentVersion: 'v1.0-dpdp',
-      },
-      create: {
-        name: data.name,
-        phone,
-        addressLine1: 'Quick onboarding booking form',
-        pincode: '500019',
-        consentGiven: true,
-        consentTimestamp: new Date(),
-        consentIpAddress: '127.0.0.1',
-        consentVersion: 'v1.0-dpdp',
-      },
-    });
-
-    // 3. Generate Unique Booking Number
-    let bookingNumber = generateBookingNumber();
-    let isUnique = false;
-    let attempts = 0;
-    while (!isUnique && attempts < 5) {
-      const existing = await prisma.booking.findUnique({
-        where: { bookingNumber },
-      });
-      if (!existing) {
-        isUnique = true;
-      } else {
-        bookingNumber = generateBookingNumber();
-        attempts++;
-      }
-    }
-
-    // 4. Encrypt sensitive patient PII
-    const encryptedPatientName = encrypt(data.name);
-    const encryptedMedicalConditions = encrypt(
-      `Service Custom Details: ${data.serviceNotes || 'None'}. Message: ${data.message || 'None'}`
-    );
-    const encryptedSpecialInstructions = encrypt('Submitted via simplified booking widget.');
-
-    // 5. Create Booking directly in CONFIRMED status
-    const booking = await prisma.booking.create({
-      data: {
-        bookingNumber,
-        customerId: customer.id,
-        serviceId: service.id,
-        startDate: start,
-        endDate: end,
-        shiftType: 'DAY_12HR',
-        totalDays,
-        totalAmount,
-        patientName: encryptedPatientName,
-        patientAge: 60, // default/fallback for onboarding
-        patientGender: 'Other',
-        medicalConditions: encryptedMedicalConditions,
-        specialInstructions: encryptedSpecialInstructions,
-        status: 'CONFIRMED', // Immediately confirmed
-      },
-    });
-
-    // 6. Log a status event record
-    await prisma.bookingStatusEvent.create({
-      data: {
-        bookingId: booking.id,
-        fromStatus: 'PENDING_OTP',
-        toStatus: 'CONFIRMED',
-        notes: 'Booking created directly via simplified landing page form.',
-      },
-    });
-
-    // 7. Send WhatsApp alert stub
-    try {
-      await sendBookingConfirmation(phone, data.name, bookingNumber, service.name);
-    } catch (err) {
-      console.warn('WhatsApp CSP send failure:', err);
-    }
-
-    return { success: true, bookingId: booking.id, bookingNumber };
-  } catch (err: any) {
-    console.error('Quick booking creation error:', err);
-    return { success: false, error: 'A database error occurred. Please try again.' };
-  }
+  return submitPublicBooking({
+    name: data.name,
+    phone: data.phone,
+    area: 'Hyderabad',
+    serviceId: data.serviceId,
+    message: `${data.serviceNotes ? `Notes: ${data.serviceNotes}. ` : ''}${data.message || ''}`,
+  });
 }

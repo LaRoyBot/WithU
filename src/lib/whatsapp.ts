@@ -1,6 +1,6 @@
 /**
  * WhatsApp Notification Dispatcher (AISensy / Wati / Twilio API Wrapper)
- * Sourced for Indian healthcare consumer expectations.
+ * Supports automated server-side message dispatch to Customers, Nurses, and Admin.
  */
 
 interface WhatsAppPayload {
@@ -12,7 +12,7 @@ interface WhatsAppPayload {
 /**
  * Low-level HTTP caller to WhatsApp Business CSP Endpoint
  */
-async function callWhatsAppApi(payload: WhatsAppPayload): Promise<boolean> {
+export async function callWhatsAppApi(payload: WhatsAppPayload): Promise<boolean> {
   const apiKey = process.env.WHATSAPP_API_KEY;
   const endpoint = process.env.WHATSAPP_API_ENDPOINT; // e.g. https://api.aisensy.com/v1/send
 
@@ -57,7 +57,6 @@ export async function sendBookingConfirmation(
   bookingNumber: string,
   serviceName: string
 ) {
-  // Normalize phone to E.164 without prefix duplicates
   const formattedPhone = phone.startsWith('+') ? phone : `+91${phone}`;
 
   return callWhatsAppApi({
@@ -96,7 +95,69 @@ export async function sendNurseAssignment(
 }
 
 /**
- * 3. Send Completed notification with payment update
+ * 3. Send Patient Assignment Dispatch to Nurse
+ */
+export async function sendNurseJobDispatch(
+  nursePhone: string,
+  nurseName: string,
+  bookingNumber: string,
+  serviceName: string,
+  customerName: string,
+  customerPhone: string,
+  area: string
+) {
+  const formattedPhone = nursePhone.startsWith('+') ? nursePhone : `+91${nursePhone}`;
+
+  return callWhatsAppApi({
+    phoneNumber: formattedPhone,
+    templateName: 'job_dispatch_nurse_neetha',
+    parameters: [
+      nurseName,
+      bookingNumber,
+      serviceName,
+      customerName,
+      customerPhone,
+      area,
+    ],
+  });
+}
+
+/**
+ * 4. Send Immediate Lead Notification to Admin
+ */
+export async function sendAdminNewBookingAlert(details: {
+  bookingNumber: string;
+  customerName: string;
+  customerPhone: string;
+  area: string;
+  serviceName: string;
+  price: number;
+  promoCode?: string;
+  message?: string;
+  hasPrescription: boolean;
+}) {
+  const adminPhone = process.env.ADMIN_WHATSAPP_PHONE || '+919876543210';
+  const formattedPhone = adminPhone.startsWith('+') ? adminPhone : `+91${adminPhone}`;
+
+  return callWhatsAppApi({
+    phoneNumber: formattedPhone,
+    templateName: 'admin_lead_alert_neetha',
+    parameters: [
+      details.bookingNumber,
+      details.customerName,
+      details.customerPhone,
+      details.area,
+      details.serviceName,
+      `Rs. ${details.price}`,
+      details.promoCode || 'None',
+      details.message || 'None',
+      details.hasPrescription ? 'Yes (Prescription Attached)' : 'No',
+    ],
+  });
+}
+
+/**
+ * 5. Send Completed notification with payment update
  */
 export async function sendBookingCompleted(
   phone: string,

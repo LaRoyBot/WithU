@@ -42,19 +42,43 @@ model Customer {
 }
 
 model Nurse {
-  id              String   @id @default(uuid())
-  name            String
-  phone           String   @unique
-  gender          String
-  qualification   String
-  experienceYears Int
-  status          String   @default("ACTIVE") // "ACTIVE", "INACTIVE", "ON_DUTY", "ON_LEAVE"
-  skills          String   // Comma-separated list of qualified services (e.g. "elderly_care,wound_dressing")
-  baseLocation    String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                  String     @id @default(uuid())
+  name                String
+  phone               String     @unique
+  email               String?    @unique
+  passwordHash        String?
+  gender              String
+  qualification       String
+  experienceYears     Int
+  panNumber           String?
+  aadharName          String?
+  certificationDocUrl String?
+  isApproved          Boolean    @default(false)
+  status              String     @default("ACTIVE") // "ACTIVE", "INACTIVE", "ON_DUTY", "ON_LEAVE"
+  skills              String     // Comma-separated list of qualified services (e.g. "elderly_care,wound_dressing")
+  baseLocation        String?
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
 
-  bookings        Booking[]
+  bookings            Booking[]
+  jobClaims           JobClaim[]
+}
+
+model JobClaim {
+  id            String    @id @default(uuid())
+  bookingId     String
+  booking       Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  nurseId       String
+  nurse         Nurse     @relation(fields: [nurseId], references: [id], onDelete: Cascade)
+  proposedPrice Decimal   @db.Decimal(10, 2)
+  proposedArea  String
+  proposedTime  String
+  status        String    @default("PENDING_APPROVAL") // "PENDING_APPROVAL", "APPROVED", "REJECTED"
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([bookingId, nurseId])
 }
 
 model Service {
@@ -93,6 +117,7 @@ model Booking {
   advancePaid         Decimal              @default(0.0) @db.Decimal(10, 2)
   paymentStatus       String               @default("PENDING") // "PENDING", "PARTIAL", "PAID", "REFUNDED"
   paymentGatewayId    String?
+  promoCode           String?
   otpCode             String?
   otpExpires          DateTime?
 
@@ -102,13 +127,16 @@ model Booking {
   patientGender       String
   medicalConditions   String               // Will store encrypted string
   specialInstructions String?              // Will store encrypted string
+  prescriptionUrl     String?              // Encrypted or URL
+  area                String?              // Locality/Area tag (e.g. Lingampally, Kondapur)
 
   // State machine
-  status              String               @default("PENDING_OTP") // "PENDING_OTP", "CONFIRMED", "NURSE_ASSIGNED", "IN_PROGRESS", "COMPLETED", "CANCELLED"
+  status              String               @default("CONFIRMED") // "PENDING_OTP", "CONFIRMED", "NURSE_ASSIGNED", "IN_PROGRESS", "COMPLETED", "CANCELLED"
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
 
   statusEvents        BookingStatusEvent[]
+  jobClaims           JobClaim[]
 }
 
 model BookingStatusEvent {
