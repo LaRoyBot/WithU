@@ -18,14 +18,16 @@ const generateBookingNumber = (): string =>
 export async function submitPublicBooking(data: {
   name: string;
   phone: string;
-  area: string;
-  serviceId: string;
+  area?: string;
+  serviceId?: string;
+  customService?: string;
+  dateNeeded?: string;
   message?: string;
   prescriptionUrl?: string;
   promoCode?: string;
 }) {
-  if (!data.name?.trim() || !data.phone?.trim() || !data.serviceId) {
-    return { success: false, error: 'Name, phone number, and service selection are required.' };
+  if (!data.name?.trim() || !data.phone?.trim() || !data.area?.trim()) {
+    return { success: false, error: 'Name, phone number, and area are required.' };
   }
 
   // Normalize phone number to E.164 (+91)
@@ -36,16 +38,42 @@ export async function submitPublicBooking(data: {
   const cleanPhone = rawPhone.length === 10 ? `+91${rawPhone}` : (data.phone.startsWith('+') ? data.phone : `+${rawPhone}`);
 
   try {
-    // 1. Fetch Service and compute initial price
-    const service = await prisma.service.findUnique({
-      where: { id: data.serviceId },
-    });
-
-    if (!service || !service.isActive) {
-      return { success: false, error: 'The selected nursing service is currently inactive or unavailable.' };
+    // 1. Fetch Service and compute initial price (or fallback for Custom / Other service)
+    let service = null;
+    if (data.serviceId && data.serviceId !== 'other') {
+      try {
+        service = await prisma.service.findUnique({
+          where: { id: data.serviceId },
+        });
+      } catch (err) {
+        console.warn('Could not fetch service by ID:', err);
+      }
     }
 
-    let calculatedPrice = Number(service.basePrice);
+    // If no serviceId was selected, or "other" was chosen, find or create generic consultation service
+    if (!service) {
+      service = await prisma.service.findFirst({
+        where: { isActive: true },
+        orderBy: { name: 'asc' },
+      });
+
+      // If still no service in database, fallback default
+      if (!service) {
+        service = {
+          id: 'custom-general-care',
+          name: data.customService?.trim() || 'General Home Nursing Consultation',
+          basePrice: 500 as any,
+          priceUnit: 'visit',
+          isActive: true,
+        } as any;
+      }
+    }
+
+    const serviceDisplayName = data.serviceId === 'other' && data.customService?.trim()
+      ? `Other: ${data.customService.trim()}`
+      : (data.serviceId ? service.name : 'Home Nursing Consultation');
+
+    let calculatedPrice = Number(service.basePrice) || 500;
 
     // Apply promo code discount if valid
     if (data.promoCode && data.promoCode.trim().toUpperCase() === 'WITHU10') {
@@ -92,14 +120,19 @@ export async function submitPublicBooking(data: {
     }
 
     // 4. Encrypt Clinical/Sensitive PHI
-    const encryptedPatientName = encrypt(data.name.trim());
-    const encryptedConditions = encrypt(
-      `Area/Location: ${data.area || 'Hyderabad'}. User Request: ${data.message || 'No additional message'}`
-    );
-    const encryptedInstructions = data.message ? encrypt(data.message) : null;
+    const clinicalNotes = [
+      `Area/Location: ${data.area.trim()}`,
+      data.dateNeeded ? `Date Needed: ${data.dateNeeded}` : null,
+      data.customService ? `Requested Custom Service: ${data.customService.trim()}` : null,
+      data.message ? `Message: ${data.message.trim()}` : null,
+    ].filter(Boolean).join(' | ');
 
-    const startDate = new Date();
-    const endDate = new Date(Date.now() + 24 * 60 * 60 * 1000); // 1-day minimum
+    const encryptedPatientName = encrypt(data.name.trim());
+    const encryptedConditions = encrypt(clinicalNotes);
+    const encryptedInstructions = data.message ? encrypt(data.message.trim()) : null;
+
+    const startDate = data.dateNeeded ? new Date(data.dateNeeded) : new Date();
+    const endDate = new Date(startDate.getTime() + 24 * 60 * 60 * 1000); // 1-day minimum
 
     // 5. Create Booking in CONFIRMED state for Admin queue & Open Job Board
     const booking = await prisma.booking.create({
@@ -107,12 +140,12 @@ export async function submitPublicBooking(data: {
         bookingNumber,
         customerId: customer.id,
         serviceId: service.id,
-        startDate,
-        endDate,
+        startDate: isNaN(startDate.getTime()) ? new Date() : startDate,
+        endDate: isNaN(endDate.getTime()) ? new Date(Date.now() + 86400000) : endDate,
         shiftType: 'DAY_12HR',
         totalDays: 1,
         totalAmount: calculatedPrice,
-        area: data.area?.trim() || 'Hyderabad',
+        area: data.area.trim(),
         promoCode: data.promoCode?.trim() || null,
         prescriptionUrl: data.prescriptionUrl || null,
         patientName: encryptedPatientName,
@@ -130,7 +163,7 @@ export async function submitPublicBooking(data: {
         bookingId: booking.id,
         fromStatus: 'PENDING_OTP',
         toStatus: 'CONFIRMED',
-        notes: `Public 2-step booking submitted by customer. Area: ${data.area || 'Hyderabad'}, Promo: ${data.promoCode || 'None'}`,
+        notes: `Public booking submitted by customer. Area: ${data.area}, Service: ${serviceDisplayName}, Promo: ${data.promoCode || 'None'}`,
       },
     });
 
@@ -140,11 +173,11 @@ export async function submitPublicBooking(data: {
         bookingNumber,
         customerName: data.name.trim(),
         customerPhone: cleanPhone,
-        area: data.area?.trim() || 'Hyderabad',
-        serviceName: service.name,
+        area: data.area.trim(),
+        serviceName: serviceDisplayName,
         price: calculatedPrice,
         promoCode: data.promoCode?.trim(),
-        message: data.message?.trim(),
+        message: clinicalNotes,
         hasPrescription: !!data.prescriptionUrl,
       });
     } catch (waErr) {
@@ -153,7 +186,7 @@ export async function submitPublicBooking(data: {
 
     // 8. Send immediate acknowledgement to customer
     try {
-      await sendBookingConfirmation(cleanPhone, data.name.trim(), bookingNumber, service.name);
+      await sendBookingConfirmation(cleanPhone, data.name.trim(), bookingNumber, serviceDisplayName);
     } catch (custWaErr) {
       console.warn('Customer WhatsApp acknowledgement error:', custWaErr);
     }
@@ -167,7 +200,7 @@ export async function submitPublicBooking(data: {
       bookingNumber,
       customerName: data.name.trim(),
       customerPhone: cleanPhone,
-      serviceName: service.name,
+      serviceName: serviceDisplayName,
       totalAmount: calculatedPrice,
     };
   } catch (err: any) {
@@ -399,21 +432,24 @@ export async function resendBookingOtp(bookingId: string) {
 }
 
 /**
- * Simplified Booking Form Submission Server Action (Legacy fallback)
+ * Simplified Booking Form Submission Server Action (Homepage Quick Booking)
  */
 export async function createQuickBooking(data: {
   name: string;
   phone: string;
-  serviceId: string;
-  serviceNotes: string;
-  dateNeeded: string;
-  message: string;
+  area: string;
+  serviceId?: string;
+  customService?: string;
+  dateNeeded?: string;
+  message?: string;
 }) {
   return submitPublicBooking({
     name: data.name,
     phone: data.phone,
-    area: 'Hyderabad',
+    area: data.area,
     serviceId: data.serviceId,
-    message: `${data.serviceNotes ? `Notes: ${data.serviceNotes}. ` : ''}${data.message || ''}`,
+    customService: data.customService,
+    dateNeeded: data.dateNeeded,
+    message: data.message,
   });
 }

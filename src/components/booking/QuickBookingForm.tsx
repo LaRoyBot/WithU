@@ -19,8 +19,9 @@ export default function QuickBookingForm({ services }: QuickBookingFormProps) {
   const router = useRouter();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [area, setArea] = useState('');
   const [serviceId, setServiceId] = useState('');
-  const [serviceNotes, setServiceNotes] = useState('');
+  const [customService, setCustomService] = useState('');
   const [dateNeeded, setDateNeeded] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,15 +29,25 @@ export default function QuickBookingForm({ services }: QuickBookingFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !phone.trim() || !serviceId || !dateNeeded) {
-      setError('Please fill in all required fields.');
+
+    // Name, Phone Number, and Area are mandatory
+    if (!name.trim()) {
+      setError('Please enter your name.');
+      return;
+    }
+    if (!phone.trim()) {
+      setError('Please enter your phone number.');
+      return;
+    }
+    if (!area.trim()) {
+      setError('Please enter your area / locality.');
       return;
     }
 
     // Basic phone validation
     const cleanPhone = phone.replace(/\D/g, '');
     if (cleanPhone.length < 10) {
-      setError('Please enter a valid phone number.');
+      setError('Please enter a valid 10-digit phone number.');
       return;
     }
 
@@ -47,14 +58,15 @@ export default function QuickBookingForm({ services }: QuickBookingFormProps) {
       const response = await createQuickBooking({
         name: name.trim(),
         phone: phone.trim(),
-        serviceId,
-        serviceNotes: serviceNotes.trim(),
-        dateNeeded,
-        message: message.trim(),
+        area: area.trim(),
+        serviceId: serviceId && serviceId !== 'other' ? serviceId : undefined,
+        customService: serviceId === 'other' ? customService.trim() : undefined,
+        dateNeeded: dateNeeded || undefined,
+        message: message.trim() || undefined,
       });
 
       if (response.success && response.bookingId) {
-        // Redirect to booking status page
+        // Redirect to booking status / confirmation page
         router.push(`/booking/status?id=${response.bookingId}`);
       } else {
         setError(response.error || 'Failed to submit booking. Please try again.');
@@ -67,111 +79,134 @@ export default function QuickBookingForm({ services }: QuickBookingFormProps) {
   };
 
   return (
-    <div className="bg-slate-950/85 backdrop-blur-md rounded-2xl p-6 shadow-2xl border border-white/10 w-full max-w-md mx-auto">
-      <h2 className="text-2xl font-extrabold text-white text-center mb-5 tracking-tight uppercase">
-        Book Now
+    <div className="bg-[#242938] rounded-2xl p-6 sm:p-8 shadow-2xl border border-white/5 w-full max-w-md mx-auto text-white">
+      <h2 className="text-2xl sm:text-3xl font-black text-white text-center mb-6 tracking-tight uppercase">
+        BOOK NOW
       </h2>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-900/40 border border-red-500/30 text-red-200 text-xs rounded-lg">
-          ⚠️ {error}
+        <div className="mb-4 p-3 bg-red-900/50 border border-red-500/40 text-red-200 text-xs rounded-xl flex items-center gap-2">
+          <span>⚠️</span>
+          <span>{error}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Name Input */}
+      <form onSubmit={handleSubmit} className="space-y-3.5">
+        {/* 1. Your Name (Mandatory) */}
         <div>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Your Name"
-            className="w-full px-4 py-2.5 bg-white border border-transparent text-slate-900 placeholder-slate-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-xs font-medium"
+            className="w-full px-4 py-3 bg-white text-slate-900 placeholder-slate-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium transition-shadow"
             required
             disabled={loading}
           />
         </div>
 
-        {/* Phone Input */}
+        {/* 2. Phone Number (Mandatory) */}
         <div>
           <input
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="Phone Number"
-            className="w-full px-4 py-2.5 bg-white border border-transparent text-slate-900 placeholder-slate-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-xs font-medium"
+            className="w-full px-4 py-3 bg-white text-slate-900 placeholder-slate-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium transition-shadow"
             required
             disabled={loading}
           />
         </div>
 
-        {/* Select a Service Dropdown */}
+        {/* 3. Area (Mandatory) */}
+        <div>
+          <input
+            type="text"
+            value={area}
+            onChange={(e) => setArea(e.target.value)}
+            placeholder="Area / Locality (e.g. Banjara Hills, Miyapur)"
+            className="w-full px-4 py-3 bg-white text-slate-900 placeholder-slate-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium transition-shadow"
+            required
+            disabled={loading}
+          />
+        </div>
+
+        {/* 4. Select a Service Dropdown (Optional) */}
         <div>
           <select
             value={serviceId}
-            onChange={(e) => setServiceId(e.target.value)}
-            className="w-full px-4 py-2.5 bg-white border border-transparent text-slate-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-xs font-medium"
-            required
+            onChange={(e) => {
+              setServiceId(e.target.value);
+              if (e.target.value !== 'other') {
+                setCustomService('');
+              }
+            }}
+            className="w-full px-4 py-3 bg-white text-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium cursor-pointer transition-shadow"
             disabled={loading}
           >
-            <option value="" disabled className="text-slate-400">
+            <option value="" className="text-slate-400">
               Select a Service
             </option>
             {services.map((s) => (
               <option key={s.id} value={s.id} className="text-slate-900">
-                {s.name} (Rs. {Number(s.basePrice)}/{s.priceUnit})
+                {s.name} (₹{Number(s.basePrice)}/{s.priceUnit})
               </option>
             ))}
+            <option value="other" className="text-slate-900 font-semibold">
+              Other
+            </option>
           </select>
         </div>
 
-        {/* Service Subtype details */}
-        <div>
-          <input
-            type="text"
-            value={serviceNotes}
-            onChange={(e) => setServiceNotes(e.target.value)}
-            placeholder="service"
-            className="w-full px-4 py-2.5 bg-white border border-transparent text-slate-900 placeholder-slate-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-xs font-medium"
-            disabled={loading}
-          />
-        </div>
+        {/* 5. Conditional Free-fill Service Box (Pops up when 'other' is selected) */}
+        {serviceId === 'other' && (
+          <div className="animate-in fade-in slide-in-from-top-1 duration-200">
+            <input
+              type="text"
+              value={customService}
+              onChange={(e) => setCustomService(e.target.value)}
+              placeholder="service"
+              className="w-full px-4 py-3 bg-white text-slate-900 placeholder-slate-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium transition-shadow"
+              disabled={loading}
+              autoFocus
+            />
+          </div>
+        )}
 
-        {/* Date of Service Needed */}
+        {/* 6. Date of Service Needed (Optional) */}
         <div>
-          <label className="block text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 px-1">
-            Date of Service Needed
+          <label className="block text-[11px] text-slate-300 font-bold uppercase tracking-wider mb-1.5 px-0.5">
+            DATE OF SERVICE NEEDED
           </label>
           <input
             type="date"
             value={dateNeeded}
             onChange={(e) => setDateNeeded(e.target.value)}
-            className="w-full px-4 py-2.5 bg-white border border-transparent text-slate-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-xs font-medium"
-            required
+            className="w-full px-4 py-3 bg-white text-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium cursor-pointer transition-shadow"
             disabled={loading}
           />
         </div>
 
-        {/* Message Input */}
+        {/* 7. Message (Optional) */}
         <div>
           <input
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Message"
-            className="w-full px-4 py-2.5 bg-white border border-transparent text-slate-900 placeholder-slate-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-xs font-medium"
+            className="w-full px-4 py-3 bg-white text-slate-900 placeholder-slate-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium transition-shadow"
             disabled={loading}
           />
         </div>
 
-        {/* Submit Button */}
+        {/* 8. Submit Button */}
         <div className="pt-2">
           <button
             type="submit"
-            className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-black text-sm uppercase tracking-wider rounded-lg transition-colors shadow-lg active:scale-98 disabled:bg-slate-700 disabled:text-slate-400 cursor-pointer text-center"
+            className="w-full py-3.5 bg-[#FF6A13] hover:bg-[#E85B07] active:scale-[0.99] text-white font-black text-sm uppercase tracking-wider rounded-lg transition-all shadow-lg hover:shadow-orange-500/25 disabled:bg-slate-700 disabled:text-slate-400 cursor-pointer text-center"
             disabled={loading}
           >
-            {loading ? 'submitting...' : 'submit'}
+            {loading ? 'SUBMITTING...' : 'SUBMIT'}
           </button>
         </div>
       </form>
