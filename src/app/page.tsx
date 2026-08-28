@@ -415,8 +415,8 @@ export default async function HomePage() {
           <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-r from-slate-900 via-slate-900/80 to-transparent z-10 pointer-events-none"></div>
           <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-l from-slate-900 via-slate-900/80 to-transparent z-10 pointer-events-none"></div>
 
-          {/* Marquee Track 1: Google Reviews Cards & Text */}
-          <div className="animate-marquee flex gap-6 pb-6 items-stretch">
+          {/* Marquee Track: Google Reviews Cards & Text */}
+          <div className="animate-marquee flex gap-6 pb-2 items-stretch">
             {[
               {
                 name: 'K. Venkatesh',
@@ -561,41 +561,6 @@ export default async function HomePage() {
                   </span>
                   <span>{item.date}</span>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Marquee Track 2: Google Review & Patient Case Image Screenshots */}
-          <div className="animate-marquee flex gap-6 pt-2 items-center">
-            {[
-              { src: '/images/original/testimonial-1.jpg', alt: 'Google Review Screenshot 1' },
-              { src: '/images/original/testimonial-3.jpg', alt: 'Google Review Screenshot 2' },
-              { src: '/images/original/testimonial-4.jpg', alt: 'Google Review Screenshot 3' },
-              { src: '/images/original/testimonial-5.jpg', alt: 'Google Review Screenshot 4' },
-              { src: '/images/original/testimonial-6.jpg', alt: 'Google Review Screenshot 5' },
-              { src: '/images/original/testimonial-7.jpg', alt: 'Google Review Screenshot 6' },
-              { src: '/images/original/hero-1.jpg', alt: 'Neetha Nursing Clinical Care' },
-              { src: '/images/original/hero-2.jpg', alt: 'Neetha Nursing Caretaker Support' },
-              // Duplicate set for seamless continuous marquee loop
-              { src: '/images/original/testimonial-1.jpg', alt: 'Google Review Screenshot 1' },
-              { src: '/images/original/testimonial-3.jpg', alt: 'Google Review Screenshot 2' },
-              { src: '/images/original/testimonial-4.jpg', alt: 'Google Review Screenshot 3' },
-              { src: '/images/original/testimonial-5.jpg', alt: 'Google Review Screenshot 4' },
-              { src: '/images/original/testimonial-6.jpg', alt: 'Google Review Screenshot 5' },
-              { src: '/images/original/testimonial-7.jpg', alt: 'Google Review Screenshot 6' },
-              { src: '/images/original/hero-1.jpg', alt: 'Neetha Nursing Clinical Care' },
-              { src: '/images/original/hero-2.jpg', alt: 'Neetha Nursing Caretaker Support' },
-            ].map((img, idx) => (
-              <div
-                key={idx}
-                className="w-64 sm:w-72 h-44 shrink-0 rounded-2xl overflow-hidden bg-slate-800 border border-slate-700/80 shadow-lg relative group p-2 flex items-center justify-center hover:scale-105 transition-transform duration-300"
-              >
-                <Image
-                  src={img.src}
-                  alt={img.alt}
-                  fill
-                  className="object-contain rounded-xl"
-                />
               </div>
             ))}
           </div>
