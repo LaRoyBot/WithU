@@ -567,6 +567,96 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Patient Success Stories (Original Real Google Review Screenshots Grid) */}
+      <section className="py-20 px-6 max-w-6xl mx-auto">
+        <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+          <span className="text-xs font-extrabold text-primary-600 uppercase tracking-widest block">Verified Success</span>
+          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Reviews From Local Families</h2>
+          <p className="text-sm text-slate-500 leading-relaxed">Real Google Business review screenshots and patient feedback from families across Gachibowli, Lingampally, Miyapur, and BHEL whom we have served.</p>
+        </div>
+
+        {/* Grid for Google review screenshots */}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Review 1 */}
+          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="relative w-full aspect-square overflow-hidden rounded-xl">
+              <Image
+                src="/images/original/testimonial-1.jpg"
+                alt="Google Review Screenshot 1"
+                fill
+                className="object-contain bg-slate-50 hover:scale-102 transition-transform duration-300"
+              />
+            </div>
+            <p className="text-[10px] text-slate-400 text-center mt-3 font-semibold uppercase tracking-wider">Verified Google Review</p>
+          </div>
+
+          {/* Review 2 */}
+          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="relative w-full aspect-square overflow-hidden rounded-xl">
+              <Image
+                src="/images/original/testimonial-3.jpg"
+                alt="Google Review Screenshot 3"
+                fill
+                className="object-contain bg-slate-50 hover:scale-102 transition-transform duration-300"
+              />
+            </div>
+            <p className="text-[10px] text-slate-400 text-center mt-3 font-semibold uppercase tracking-wider">Verified Google Review</p>
+          </div>
+
+          {/* Review 3 */}
+          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="relative w-full aspect-square overflow-hidden rounded-xl">
+              <Image
+                src="/images/original/testimonial-7.jpg"
+                alt="Google Review Screenshot 7"
+                fill
+                className="object-contain bg-slate-50 hover:scale-102 transition-transform duration-300"
+              />
+            </div>
+            <p className="text-[10px] text-slate-400 text-center mt-3 font-semibold uppercase tracking-wider">Verified Google Review</p>
+          </div>
+
+          {/* Review 4 */}
+          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="relative w-full aspect-[8/5.33] overflow-hidden rounded-xl">
+              <Image
+                src="/images/original/testimonial-4.jpg"
+                alt="Google Review Screenshot 4"
+                fill
+                className="object-contain bg-slate-50 hover:scale-102 transition-transform duration-300"
+              />
+            </div>
+            <p className="text-[10px] text-slate-400 text-center mt-3 font-semibold uppercase tracking-wider">Verified Google Review</p>
+          </div>
+
+          {/* Review 5 */}
+          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="relative w-full aspect-[8/5.33] overflow-hidden rounded-xl">
+              <Image
+                src="/images/original/testimonial-5.jpg"
+                alt="Google Review Screenshot 5"
+                fill
+                className="object-contain bg-slate-50 hover:scale-102 transition-transform duration-300"
+              />
+            </div>
+            <p className="text-[10px] text-slate-400 text-center mt-3 font-semibold uppercase tracking-wider">Verified Google Review</p>
+          </div>
+
+          {/* Review 6 */}
+          <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="relative w-full aspect-[8/5.33] overflow-hidden rounded-xl">
+              <Image
+                src="/images/original/testimonial-6.jpg"
+                alt="Google Review Screenshot 6"
+                fill
+                className="object-contain bg-slate-50 hover:scale-102 transition-transform duration-300"
+              />
+            </div>
+            <p className="text-[10px] text-slate-400 text-center mt-3 font-semibold uppercase tracking-wider">Verified Google Review</p>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="bg-gradient-to-tr from-primary-900 to-indigo-900 text-white py-16 px-6 text-center">
         <div className="max-w-2xl mx-auto space-y-6">
