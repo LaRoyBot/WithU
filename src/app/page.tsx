@@ -74,7 +74,8 @@ export default async function HomePage() {
             <Link href="/services" className="hover:text-primary-600 transition-colors">Our Services</Link>
             <Link href="/about" className="hover:text-primary-600 transition-colors">About Us</Link>
             <Link href="/contact" className="hover:text-primary-600 transition-colors">Contact</Link>
-            <Link href="/admin" className="text-slate-400 hover:text-primary-600 transition-colors">Admin Portal</Link>
+            <Link href="/employee/login" className="text-slate-500 hover:text-primary-600 transition-colors">Caregiver Portal</Link>
+            <Link href="/admin" className="text-slate-400 hover:text-primary-600 transition-colors">Admin</Link>
           </nav>
 
           <div className="flex items-center gap-4">
@@ -551,8 +552,15 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
-        <div className="max-w-6xl mx-auto mt-12 pt-8 border-t border-slate-800 text-center text-[10px] text-slate-500">
-          © {new Date().getFullYear()} Neetha Nursing Service. All rights reserved. Encrypted with industrial standard AES-256-GCM. Fully aligned to India's DPDP Act, 2023.
+        <div className="max-w-6xl mx-auto mt-12 pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] text-slate-500">
+          <div>
+            © {new Date().getFullYear()} Neetha Nursing Service. All rights reserved. Encrypted with industrial standard AES-256-GCM. Fully aligned to India's DPDP Act, 2023.
+          </div>
+          <div className="flex items-center gap-4 text-slate-400">
+            <Link href="/employee/login" className="hover:text-primary-400 transition-colors">Caregiver / Nurse Portal</Link>
+            <span>•</span>
+            <Link href="/admin" className="hover:text-primary-400 transition-colors">Admin Control Center</Link>
+          </div>
         </div>
       </footer>
 
