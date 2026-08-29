@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { prisma } from '@/lib/prisma';
 import QuickBookingForm from '@/components/booking/QuickBookingForm';
+import HeaderNavbar from '@/components/navigation/HeaderNavbar';
 import {
   ShieldCheck,
   Lock,
@@ -53,42 +54,7 @@ export default async function HomePage() {
       </div>
 
       {/* Header / Navigation */}
-      <header className="border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-50 transition-all duration-300">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative w-10 h-10 overflow-hidden rounded-full border border-primary-100 group-hover:scale-105 transition-transform duration-200">
-              <Image
-                src="/images/original/logo.jpg"
-                alt="Neetha Nursing Service Logo"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-base font-black text-slate-900 tracking-tight leading-tight">Neetha Nursing</span>
-              <span className="text-[10px] font-bold text-primary-600 uppercase tracking-widest leading-tight">At-Home Healthcare</span>
-            </div>
-          </Link>
-
-          <nav className="hidden md:flex gap-8 text-[13px] font-semibold text-slate-600">
-            <Link href="/services" className="hover:text-primary-600 transition-colors">Our Services</Link>
-            <Link href="/about" className="hover:text-primary-600 transition-colors">About Us</Link>
-            <Link href="/contact" className="hover:text-primary-600 transition-colors">Contact</Link>
-            <Link href="/customer/login" className="text-slate-600 hover:text-primary-600 transition-colors">Patient / Customer Login</Link>
-            <Link href="/employee/login" className="text-slate-500 hover:text-primary-600 transition-colors">Staff Login</Link>
-            <Link href="/admin" className="text-slate-400 hover:text-primary-600 transition-colors">Admin</Link>
-          </nav>
-
-          <div className="flex items-center gap-4">
-            <Link
-              href="/booking"
-              className="bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-bold px-5 py-2.5 rounded-full transition-all duration-200 shadow-sm hover:shadow-md"
-            >
-              Book Home Visit
-            </Link>
-          </div>
-        </div>
-      </header>
+      <HeaderNavbar />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-white py-16 lg:py-24 px-6 border-b border-slate-100">
