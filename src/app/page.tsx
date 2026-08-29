@@ -74,7 +74,8 @@ export default async function HomePage() {
             <Link href="/services" className="hover:text-primary-600 transition-colors">Our Services</Link>
             <Link href="/about" className="hover:text-primary-600 transition-colors">About Us</Link>
             <Link href="/contact" className="hover:text-primary-600 transition-colors">Contact</Link>
-            <Link href="/employee/login" className="text-slate-500 hover:text-primary-600 transition-colors">Caregiver Portal</Link>
+            <Link href="/customer/login" className="text-slate-600 hover:text-primary-600 transition-colors">Patient / Customer Login</Link>
+            <Link href="/employee/login" className="text-slate-500 hover:text-primary-600 transition-colors">Staff Login</Link>
             <Link href="/admin" className="text-slate-400 hover:text-primary-600 transition-colors">Admin</Link>
           </nav>
 
@@ -730,7 +731,9 @@ export default async function HomePage() {
             © {new Date().getFullYear()} Neetha Nursing Service. All rights reserved. Encrypted with industrial standard AES-256-GCM. Fully aligned to India's DPDP Act, 2023.
           </div>
           <div className="flex items-center gap-4 text-slate-400">
-            <Link href="/employee/login" className="hover:text-primary-400 transition-colors">Caregiver / Nurse Portal</Link>
+            <Link href="/customer/login" className="hover:text-primary-400 transition-colors">Customer / Patient Login</Link>
+            <span>•</span>
+            <Link href="/employee/login" className="hover:text-primary-400 transition-colors">Staff Login</Link>
             <span>•</span>
             <Link href="/admin" className="hover:text-primary-400 transition-colors">Admin Control Center</Link>
           </div>

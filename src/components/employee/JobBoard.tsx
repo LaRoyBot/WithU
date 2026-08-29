@@ -44,7 +44,6 @@ interface AssignedJob {
   specialInstructions: string | null;
   prescriptionUrl: string | null;
   customerName: string;
-  customerPhone: string;
   customerAddress: string;
 }
 
@@ -110,17 +109,6 @@ export default function JobBoard({ employee, openJobs, assignedJobs }: JobBoardP
   const handleSignOut = async () => {
     await employeeLogout();
     router.push('/employee/login');
-  };
-
-  // Helper for generating WhatsApp deep link to message patient
-  const generateWhatsAppLink = (job: AssignedJob) => {
-    const cleanPhone = job.customerPhone.replace(/\D/g, '');
-    const formattedPhone = cleanPhone.startsWith('91') ? cleanPhone : `91${cleanPhone}`;
-    const startFormatted = new Date(job.startDate).toLocaleDateString();
-
-    const message = `Hello ${job.customerName}, I am ${employee.name} from Neetha Nursing Service (WithU Care). I have been assigned to assist ${job.patientName} with ${job.serviceName} starting on ${startFormatted}. Please let me know your preferred arrival time and if you have any questions.`;
-
-    return `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
   };
 
   return (
@@ -337,34 +325,34 @@ export default function JobBoard({ employee, openJobs, assignedJobs }: JobBoardP
 
                     <div className="space-y-1.5">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                        Coordinator / Family Contact
+                        Assigned Service Location & Address
                       </span>
                       <p className="text-slate-200">
-                        Contact Person: <strong className="text-white">{job.customerName}</strong>
+                        Primary Contact: <strong className="text-white">{job.customerName}</strong>
                       </p>
                       <p className="text-slate-200">
-                        Phone: <strong className="text-emerald-400 font-mono">{job.customerPhone}</strong>
+                        Locality: <strong className="text-emerald-400">{job.area}</strong>
                       </p>
                       <p className="text-slate-300">
-                        Address: <span className="text-slate-400">{job.customerAddress}</span>
+                        Full Address: <span className="text-slate-400">{job.customerAddress}</span>
                       </p>
                     </div>
                   </div>
 
-                  {/* Flow 1: Action Button: Book Now via WhatsApp */}
-                  <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-2">
-                    <span className="text-xs text-slate-400">
-                      Click below to open WhatsApp with prefilled patient & service details from your phone.
+                  {/* Operational Note */}
+                  <div className="flex items-center justify-between gap-3 pt-2 text-xs text-slate-400">
+                    <span className="inline-flex items-center gap-1.5 text-slate-400 text-[11px]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                      Patient phone is kept confidential by central coordination. Direct assistance arranged at the above location.
                     </span>
-
                     <a
-                      href={generateWhatsAppLink(job)}
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(job.customerAddress || job.area)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full sm:w-auto px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-emerald-950/50 flex items-center justify-center gap-2 cursor-pointer"
+                      className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 shrink-0"
                     >
-                      <span>💬</span>
-                      <span>Book Now (WhatsApp Patient)</span>
+                      <span>📍</span>
+                      <span>Open Location in Maps</span>
                     </a>
                   </div>
                 </div>

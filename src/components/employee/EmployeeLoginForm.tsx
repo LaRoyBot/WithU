@@ -37,7 +37,7 @@ export default function EmployeeLoginForm() {
         <span className="inline-block p-3 rounded-full bg-primary-950/80 border border-primary-500/20 text-primary-400 mb-3">
           🩺
         </span>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Caregiver Portal</h1>
+        <h1 className="text-2xl font-bold text-white tracking-tight">Staff Login</h1>
         <p className="text-xs text-slate-400 mt-1">
           Login using credentials assigned by Neetha Nursing Administration.
         </p>

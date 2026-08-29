@@ -32,7 +32,7 @@ export default async function EmployeeDashboardPage() {
               W
             </span>
             <div>
-              <span className="font-bold text-white text-sm tracking-tight block">WithU Caregiver</span>
+              <span className="font-bold text-white text-sm tracking-tight block">WithU Staff Portal</span>
               <span className="text-[10px] text-emerald-400 font-bold block">✓ Verified Active Nurse</span>
             </div>
           </div>

@@ -263,7 +263,7 @@ export async function getMyAssignedJobs() {
         endDate: b.endDate.toISOString(),
         status: b.status,
         area: b.area || b.customer.addressLine1,
-        // Revealed Patient & Customer Details
+        // Revealed Patient Details: Location and address only (Patient phone withheld for privacy)
         patientName: decryptedPatientName,
         patientAge: b.patientAge,
         patientGender: b.patientGender,
@@ -271,7 +271,6 @@ export async function getMyAssignedJobs() {
         specialInstructions: decryptedSpecialInstructions,
         prescriptionUrl: b.prescriptionUrl,
         customerName: b.customer.name,
-        customerPhone: b.customer.phone,
         customerAddress: `${b.customer.addressLine1}${b.customer.addressLine2 ? ', ' + b.customer.addressLine2 : ''}, Pincode: ${b.customer.pincode}`,
       };
     });

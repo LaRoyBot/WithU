@@ -95,16 +95,15 @@ export async function sendNurseAssignment(
 }
 
 /**
- * 3. Send Patient Assignment Dispatch to Nurse
+ * 3. Send Patient Assignment Dispatch to Nurse (Location/Address Only, Patient Phone Hidden)
  */
 export async function sendNurseJobDispatch(
   nursePhone: string,
   nurseName: string,
   bookingNumber: string,
   serviceName: string,
-  customerName: string,
-  customerPhone: string,
-  area: string
+  patientName: string,
+  locationAddress: string
 ) {
   const formattedPhone = nursePhone.startsWith('+') ? nursePhone : `+91${nursePhone}`;
 
@@ -115,9 +114,8 @@ export async function sendNurseJobDispatch(
       nurseName,
       bookingNumber,
       serviceName,
-      customerName,
-      customerPhone,
-      area,
+      patientName,
+      locationAddress, // Service location and address (No patient phone)
     ],
   });
 }
@@ -174,6 +172,28 @@ export async function sendBookingCompleted(
       customerName,
       bookingNumber,
       `Rs. ${totalAmount}`,
+    ],
+  });
+}
+
+/**
+ * 6. Send Customer Login / Verification OTP via SMS or WhatsApp
+ */
+export async function sendCustomerOtp(
+  phone: string,
+  otpCode: string,
+  channel: 'WHATSAPP' | 'SMS' = 'WHATSAPP'
+) {
+  const formattedPhone = phone.startsWith('+') ? phone : `+91${phone}`;
+
+  console.log(`[CUSTOMER AUTH OTP] Channel: ${channel} | Phone: ${formattedPhone} | Code: ${otpCode}`);
+
+  return callWhatsAppApi({
+    phoneNumber: formattedPhone,
+    templateName: 'customer_login_otp_neetha',
+    parameters: [
+      otpCode,
+      '5 minutes',
     ],
   });
 }

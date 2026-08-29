@@ -197,20 +197,23 @@ export async function assignNurse(bookingId: string, nurseId: string) {
     );
 
     let clinicalInfo = booking.area || booking.customer.addressLine1;
+    let patientDisplayName = booking.customer.name;
     try {
+      const decryptedName = decrypt(booking.patientName);
+      if (decryptedName) patientDisplayName = decryptedName;
       const decryptedConditions = decrypt(booking.medicalConditions);
       if (decryptedConditions) {
         clinicalInfo += ` | Care Notes: ${decryptedConditions}`;
       }
     } catch {}
 
+    // Send dispatch to nurse: location and address details only (NO patient phone number)
     await sendNurseJobDispatch(
       nurse.phone,
       nurse.name,
       booking.bookingNumber,
       booking.service.name,
-      booking.customer.name,
-      booking.customer.phone,
+      patientDisplayName,
       clinicalInfo
     );
 
@@ -282,13 +285,19 @@ export async function approveJobClaim(claimId: string) {
       claim.nurse.phone
     );
 
+    let patientDisplayName = claim.booking.customer.name;
+    try {
+      const decryptedName = decrypt(claim.booking.patientName);
+      if (decryptedName) patientDisplayName = decryptedName;
+    } catch {}
+
+    // Send dispatch to nurse: location and address details only (NO patient phone number)
     await sendNurseJobDispatch(
       claim.nurse.phone,
       claim.nurse.name,
       claim.booking.bookingNumber,
       claim.booking.service.name,
-      claim.booking.customer.name,
-      claim.booking.customer.phone,
+      patientDisplayName,
       claim.proposedArea || claim.booking.area || claim.booking.customer.addressLine1
     );
 
