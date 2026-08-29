@@ -1,21 +1,27 @@
 import React from 'react';
 import EmployeeLoginForm from '@/components/employee/EmployeeLoginForm';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export const metadata = {
-  title: 'Caregiver Login - WithU Healthcare',
-  description: 'Employee caregiver portal for viewing and bidding on nursing jobs.',
+  title: 'Staff Login | Neetha Nursing Service',
+  description: 'Employee & nurse staff portal for viewing and managing nursing visits.',
 };
 
 export default function EmployeeLoginPage() {
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col justify-between p-4 sm:p-8">
       <header className="flex justify-between items-center max-w-5xl mx-auto w-full py-4">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-white font-black text-sm">
-            W
-          </span>
-          <span className="font-bold text-white text-base tracking-tight">WithU Caregiver</span>
+        <Link href="/" className="flex items-center gap-3">
+          <div className="relative w-8 h-8 overflow-hidden rounded-full border border-primary-500/20">
+            <Image
+              src="/images/original/logo.jpg"
+              alt="Neetha Nursing Service Logo"
+              fill
+              className="object-cover"
+            />
+          </div>
+          <span className="font-bold text-white text-base tracking-tight">Neetha Nursing Staff</span>
         </Link>
         <Link
           href="/"
@@ -30,7 +36,7 @@ export default function EmployeeLoginPage() {
       </main>
 
       <footer className="text-center text-xs text-slate-600 py-4 max-w-5xl mx-auto w-full">
-        &copy; {new Date().getFullYear()} WithU Care Network. Authorized Personnel Only.
+        &copy; {new Date().getFullYear()} Neetha Nursing Service. Authorized Staff Personnel Only.
       </footer>
     </div>
   );

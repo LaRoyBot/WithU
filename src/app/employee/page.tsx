@@ -3,6 +3,7 @@ import { getEmployeeSession, getAvailableJobs, getMyAssignedJobs } from '@/actio
 import { redirect } from 'next/navigation';
 import JobBoard from '@/components/employee/JobBoard';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -27,15 +28,20 @@ export default async function EmployeeDashboardPage() {
       {/* Top Navbar */}
       <header className="border-b border-slate-800/80 bg-slate-900/50 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3.5 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <span className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-white font-black text-sm">
-              W
-            </span>
+          <Link href="/" className="flex items-center gap-3">
+            <div className="relative w-8 h-8 overflow-hidden rounded-full border border-primary-500/20">
+              <Image
+                src="/images/original/logo.jpg"
+                alt="Neetha Nursing Service Logo"
+                fill
+                className="object-cover"
+              />
+            </div>
             <div>
-              <span className="font-bold text-white text-sm tracking-tight block">WithU Staff Portal</span>
+              <span className="font-bold text-white text-sm tracking-tight block">Neetha Nursing Staff</span>
               <span className="text-[10px] text-emerald-400 font-bold block">✓ Verified Active Nurse</span>
             </div>
-          </div>
+          </Link>
 
           <div className="flex items-center gap-4">
             <Link
