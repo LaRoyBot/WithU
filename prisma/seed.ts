@@ -118,32 +118,47 @@ async function main() {
     {
       name: 'Sister Anjali Kumari',
       phone: '+919876543210',
+      email: 'anjali@neethanursing.com',
+      passwordHash: hashPassword('nurse123'),
       gender: 'Female',
       qualification: 'GNM (General Nursing and Midwifery)',
       experienceYears: 6,
       status: 'ACTIVE',
+      isApproved: true,
       skills: 'im-iv-injections,wound-surgical-dressing,at-home-ivf-support,post-surgical-care',
       baseLocation: 'Lingampally, Hyderabad',
+      panNumber: 'ABCDE1234F',
+      aadharName: 'Anjali Kumari',
     },
     {
       name: 'Brother Raju Prasad',
       phone: '+919876543211',
+      email: 'raju@neethanursing.com',
+      passwordHash: hashPassword('nurse123'),
       gender: 'Male',
       qualification: 'B.Sc. Nursing',
       experienceYears: 4,
       status: 'ACTIVE',
+      isApproved: true,
       skills: 'im-iv-injections,wound-surgical-dressing,urinary-catheter-change,physiotherapy-rehab',
       baseLocation: 'Kondapur, Hyderabad',
+      panNumber: 'BCDEF2345G',
+      aadharName: 'Raju Prasad',
     },
     {
       name: 'Sister Neeraja Reddy',
       phone: '+919876543212',
+      email: 'neeraja@neethanursing.com',
+      passwordHash: hashPassword('nurse123'),
       gender: 'Female',
       qualification: 'ANM (Auxiliary Nurse Midwifery)',
       experienceYears: 8,
       status: 'ACTIVE',
+      isApproved: true,
       skills: 'dedicated-24-7-nursing,post-surgical-care,iv-infusion-hydration',
       baseLocation: 'Miyapur, Hyderabad',
+      panNumber: 'CDEFG3456H',
+      aadharName: 'Neeraja Reddy',
     },
   ];
 
@@ -154,6 +169,12 @@ async function main() {
     if (!existing) {
       await prisma.nurse.create({ data: n });
       console.log(`Created nurse: ${n.name}`);
+    } else {
+      await prisma.nurse.update({
+        where: { phone: n.phone },
+        data: n,
+      });
+      console.log(`Updated nurse credentials: ${n.name}`);
     }
   }
 
