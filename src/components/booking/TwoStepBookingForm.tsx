@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { submitPublicBooking } from '@/actions/booking';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export interface ServiceOption {
   id: string;
@@ -415,17 +416,25 @@ export default function TwoStepBookingForm({ services }: TwoStepBookingFormProps
               Scan & Pay with any UPI App
             </div>
 
-            {/* Simulated UPI QR Code SVG */}
-            <div className="bg-white p-3 rounded-xl w-32 h-32 mx-auto shadow-md flex items-center justify-center">
-              <svg className="w-full h-full" viewBox="0 0 100 100" fill="currentColor">
-                <path d="M0 0h30v30H0V0zm6 6h18v18H6V6zm70-6h30v30H76V0zm6 6h18v18H82V6zM0 70h30v30H0V70zm6 6h18v18H6V76zm40-70h8v8h-8V6zm14 0h8v8h-8V6zm-14 14h8v8h-8v-8zm14 0h8v8h-8v-8zm-28 20h8v8h-8v-8zm14 0h8v8h-8v-8zm14 0h8v8h-8v-8zm14 0h8v8h-8v-8zm14 0h8v8h-8v-8zm-42 14h8v8h-8v-8zm14 0h8v8h-8v-8zm14 0h8v8h-8v-8zm-42 14h8v8h-8v-8zm14 0h8v8h-8v-8zm28 0h8v8h-8v-8zm-28 14h8v8h-8v-8zm14 0h8v8h-8v-8zm14 0h8v8h-8v-8zm14 0h8v8h-8v-8z" />
-              </svg>
+            {/* Real Paytm UPI QR Code */}
+            <div className="bg-white p-2 rounded-2xl w-48 mx-auto shadow-xl border border-white/20 overflow-hidden flex flex-col items-center">
+              <div className="relative w-44 h-56">
+                <Image
+                  src="/images/original/payment-qr.jpg"
+                  alt="Neetha Nursing Paytm UPI Payment QR"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
             </div>
 
             <p className="text-xs font-black text-amber-300 tracking-wide">
               "To avail discount, please make payment"
             </p>
-            <div className="text-[10px] font-mono text-slate-400">UPI ID: withu.healthcare@icici</div>
+            <div className="text-[10px] font-mono text-slate-300 bg-slate-950/60 py-1.5 px-3 rounded-lg inline-block border border-slate-800">
+              UPI ID: <span className="text-emerald-400 font-bold">paytm.s2x2tge@pty</span>
+            </div>
           </div>
 
           {/* Promo Code Entry Box */}
