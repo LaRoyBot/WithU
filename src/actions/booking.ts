@@ -25,6 +25,8 @@ export async function submitPublicBooking(data: {
   message?: string;
   prescriptionUrl?: string;
   promoCode?: string;
+  paymentMode?: 'PAY_NOW' | 'PAY_AFTER';
+  utrNumber?: string;
 }) {
   if (!data.name?.trim() || !data.phone?.trim() || !data.area?.trim()) {
     return { success: false, error: 'Name, phone number, and area are required.' };
@@ -120,10 +122,16 @@ export async function submitPublicBooking(data: {
     }
 
     // 4. Encrypt Clinical/Sensitive PHI
+    const paymentNotes = [
+      data.paymentMode === 'PAY_NOW' ? 'Payment Mode: Online (UPI - Pay Now)' : 'Payment Mode: Doorstep (Pay After Visit)',
+      data.utrNumber ? `UTR / Ref: ${data.utrNumber.trim()}` : null,
+    ].filter(Boolean).join(' | ');
+
     const clinicalNotes = [
       `Area/Location: ${data.area.trim()}`,
       data.dateNeeded ? `Date Needed: ${data.dateNeeded}` : null,
       data.customService ? `Requested Custom Service: ${data.customService.trim()}` : null,
+      paymentNotes,
       data.message ? `Message: ${data.message.trim()}` : null,
     ].filter(Boolean).join(' | ');
 

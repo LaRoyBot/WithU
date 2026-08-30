@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { submitPublicBooking } from '@/actions/booking';
 import Link from 'next/link';
 import Image from 'next/image';
+import ModernPaymentSection from './ModernPaymentSection';
 
 export interface ServiceOption {
   id: string;
@@ -54,6 +55,8 @@ export default function TwoStepBookingForm({ services }: TwoStepBookingFormProps
   const [prescriptionName, setPrescriptionName] = useState('');
   const [promoCode, setPromoCode] = useState('');
   const [promoDiscountApplied, setPromoDiscountApplied] = useState(false);
+  const [paymentMode, setPaymentMode] = useState<'PAY_NOW' | 'PAY_AFTER'>('PAY_NOW');
+  const [utrNumber, setUtrNumber] = useState('');
 
   // Submission & UI State
   const [loading, setLoading] = useState(false);
@@ -128,6 +131,8 @@ export default function TwoStepBookingForm({ services }: TwoStepBookingFormProps
         message: message.trim(),
         prescriptionUrl: prescriptionUrl || undefined,
         promoCode: promoDiscountApplied ? 'WITHU10' : promoCode.trim() || undefined,
+        paymentMode,
+        utrNumber: utrNumber.trim() || undefined,
       });
 
       if (res.success) {
@@ -410,32 +415,15 @@ export default function TwoStepBookingForm({ services }: TwoStepBookingFormProps
             </div>
           </div>
 
-          {/* Payment QR Code & Copy */}
-          <div className="bg-gradient-to-br from-slate-900 to-purple-950/40 rounded-2xl p-4 border border-purple-900/30 text-center space-y-3">
-            <div className="inline-block px-3 py-1 bg-purple-500/20 border border-purple-500/30 text-purple-300 text-[10px] font-bold rounded-full uppercase tracking-wider">
-              Scan & Pay with any UPI App
-            </div>
-
-            {/* Real Paytm UPI QR Code */}
-            <div className="bg-white p-2 rounded-2xl w-48 mx-auto shadow-xl border border-white/20 overflow-hidden flex flex-col items-center">
-              <div className="relative w-44 h-56">
-                <Image
-                  src="/images/original/payment-qr.jpg"
-                  alt="Neetha Nursing Paytm UPI Payment QR"
-                  fill
-                  className="object-contain"
-                  priority
-                />
-              </div>
-            </div>
-
-            <p className="text-xs font-black text-amber-300 tracking-wide">
-              "To avail discount, please make payment"
-            </p>
-            <div className="text-[10px] font-mono text-slate-300 bg-slate-950/60 py-1.5 px-3 rounded-lg inline-block border border-slate-800">
-              UPI ID: <span className="text-emerald-400 font-bold">paytm.s2x2tge@pty</span>
-            </div>
-          </div>
+          {/* Modern Interactive UPI & Doorstep Payment Section */}
+          <ModernPaymentSection
+            finalPrice={finalPrice}
+            serviceName={currentService?.name || 'Nursing Service'}
+            paymentMode={paymentMode}
+            onPaymentModeChange={setPaymentMode}
+            utrNumber={utrNumber}
+            onUtrChange={setUtrNumber}
+          />
 
           {/* Promo Code Entry Box */}
           <div>
