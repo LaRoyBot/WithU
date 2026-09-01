@@ -51,7 +51,7 @@ export default function NurseRoster({ nurses }: NurseRosterProps) {
     setName('');
     setPhone('+91');
     setEmail('');
-    setPassword('nurse123');
+    setPassword('');
     setGender('Female');
     setQualification('GNM (General Nursing)');
     setExperienceYears(2);
@@ -242,7 +242,7 @@ export default function NurseRoster({ nurses }: NurseRosterProps) {
                 type="text"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={editingNurse ? 'Unchanged' : 'e.g. nurse123'}
+                placeholder={editingNurse ? 'Unchanged' : 'Use a unique strong password'}
                 className="w-full rounded border border-gray-300 px-3 py-2 focus:ring-1 focus:ring-primary-500 focus:outline-none font-mono"
               />
             </div>

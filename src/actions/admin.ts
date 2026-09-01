@@ -1,20 +1,10 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { createHash } from 'node:crypto';
-import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { sendNurseAssignment, sendBookingCompleted, sendNurseJobDispatch } from '@/lib/whatsapp';
 import { decrypt } from '@/lib/crypto';
-
-// Default / fallback root coordinator credentials
-const ROOT_ADMIN = {
-  id: 'admin-root-001',
-  email: 'admin@neethanursing.com',
-  name: 'Neetha Coordinator',
-  role: 'SUPER_ADMIN',
-  passwordHash: createHash('sha256').update('admin123').digest('hex'),
-};
+import { getAdminIdentity, hashPassword, revokeCurrentSession, setSession, verifyPassword } from '@/lib/auth';
 
 /**
  * Log in admin and set secure session cookie
@@ -27,43 +17,17 @@ export async function adminLogin(formData: FormData) {
     return { error: 'Please enter both email and password' };
   }
 
-  const hashedInput = createHash('sha256').update(password).digest('hex');
-
   try {
-    let admin = null;
-
-    try {
-      admin = await prisma.adminUser.findUnique({
-        where: { email },
-      });
-    } catch (dbErr) {
-      console.warn('Prisma AdminUser query failed, checking root admin fallback:', dbErr);
-    }
-
-    // Check database record or fallback root credentials
-    if (admin) {
-      if (admin.passwordHash !== hashedInput) {
-        return { error: 'Invalid email or password' };
-      }
-    } else if (email === ROOT_ADMIN.email && hashedInput === ROOT_ADMIN.passwordHash) {
-      admin = ROOT_ADMIN;
-    } else {
+    const admin = await prisma.adminUser.findUnique({ where: { email } });
+    if (!admin) {
       return { error: 'Invalid email or password' };
     }
-
-    // Set secure cookie
-    const cookieStore = await cookies();
-    cookieStore.set('neetha_admin_session', JSON.stringify({
-      id: admin.id,
-      email: admin.email,
-      name: admin.name,
-      role: admin.role,
-    }), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 8, // 8 hours session
-      path: '/',
-    });
+    const verification = await verifyPassword(password, admin.passwordHash);
+    if (!verification.valid) return { error: 'Invalid email or password' };
+    if (verification.needsRehash) {
+      await prisma.adminUser.update({ where: { id: admin.id }, data: { passwordHash: await hashPassword(password) } });
+    }
+    await setSession('ADMIN', admin.id, 60 * 60 * 8);
 
     return { success: true };
   } catch (err: any) {
@@ -76,8 +40,7 @@ export async function adminLogin(formData: FormData) {
  * Log out admin
  */
 export async function adminLogout() {
-  const cookieStore = await cookies();
-  cookieStore.delete('neetha_admin_session');
+  await revokeCurrentSession('ADMIN');
   return { success: true };
 }
 
@@ -85,14 +48,8 @@ export async function adminLogout() {
  * Get active Admin Session from cookies
  */
 export async function getAdminSession() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get('neetha_admin_session');
-  if (!sessionCookie) return null;
-  try {
-    return JSON.parse(sessionCookie.value);
-  } catch {
-    return null;
-  }
+  const admin = await getAdminIdentity();
+  return admin && (admin.role === 'ADMIN' || admin.role === 'SUPER_ADMIN') ? admin : null;
 }
 
 /**
@@ -125,7 +82,7 @@ export async function updateBookingStatus(
           fromStatus: booking.status,
           toStatus: newStatus,
           notes: notes || `Status changed to ${newStatus} by admin ${session.name}`,
-          changedByAdminId: session.id === ROOT_ADMIN.id ? undefined : session.id,
+          changedByAdminId: session.id,
         },
       }),
     ]);
@@ -182,7 +139,7 @@ export async function assignNurse(bookingId: string, nurseId: string) {
           fromStatus: booking.status,
           toStatus: 'NURSE_ASSIGNED',
           notes: `Nurse ${nurse.name} (${nurse.phone}) assigned directly by admin ${session.name}`,
-          changedByAdminId: session.id === ROOT_ADMIN.id ? undefined : session.id,
+          changedByAdminId: session.id,
         },
       }),
     ]);
@@ -272,7 +229,7 @@ export async function approveJobClaim(claimId: string) {
           fromStatus: claim.booking.status,
           toStatus: 'NURSE_ASSIGNED',
           notes: `Job claim approved by admin ${session.name}. Nurse ${claim.nurse.name} assigned at Rs. ${claim.proposedPrice}.`,
-          changedByAdminId: session.id === ROOT_ADMIN.id ? undefined : session.id,
+          changedByAdminId: session.id,
         },
       }),
     ]);
@@ -360,7 +317,7 @@ export async function upsertNurseRoster(data: {
   try {
     let passwordHash = undefined;
     if (data.password && data.password.trim().length > 0) {
-      passwordHash = createHash('sha256').update(data.password.trim()).digest('hex');
+      passwordHash = await hashPassword(data.password.trim());
     }
 
     if (data.id) {
@@ -391,7 +348,8 @@ export async function upsertNurseRoster(data: {
         data: updateData,
       });
     } else {
-      const initialHash = passwordHash || createHash('sha256').update('nurse123').digest('hex');
+      if (!passwordHash) return { error: 'A strong initial password is required for new staff accounts.' };
+      const initialHash = passwordHash;
       await prisma.nurse.create({
         data: {
           name: data.name,

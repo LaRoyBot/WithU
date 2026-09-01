@@ -1,10 +1,11 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { decrypt } from '@/lib/crypto';
 import { sendCustomerOtp } from '@/lib/whatsapp';
+import { consumeCustomerOtpChallenge, createCustomerOtpChallenge, generateOtp, getCustomerIdentity, revokeCurrentSession, setSession } from '@/lib/auth';
+import { allowAttempt } from '@/lib/rate-limit';
 
 /**
  * 1. Request Customer Login OTP via Phone Number (WhatsApp / SMS)
@@ -16,62 +17,25 @@ export async function requestCustomerOtp(phoneInput: string, channel: 'WHATSAPP'
   }
 
   const formattedPhone = cleanPhone.length === 10 ? `+91${cleanPhone}` : `+${cleanPhone}`;
+  if (!allowAttempt('customer-otp-request', formattedPhone, 3, 15 * 60 * 1000)) {
+    return { error: 'Too many verification requests. Please try again later.' };
+  }
 
   try {
-    // Check if customer exists or create placeholder
-    let customer = await prisma.customer.findFirst({
-      where: {
-        OR: [
-          { phone: formattedPhone },
-          { phone: cleanPhone },
-          { phone: cleanPhone.slice(-10) },
-        ],
-      },
-    });
-
-    if (!customer) {
-      // Allow new customers to also register/log in via OTP
-      customer = await prisma.customer.create({
-        data: {
-          name: 'Patient / Family',
-          phone: formattedPhone,
-          addressLine1: 'Hyderabad',
-          pincode: '500019',
-          city: 'Hyderabad',
-          consentGiven: true,
-          consentTimestamp: new Date(),
-          consentIpAddress: '127.0.0.1',
-          consentVersion: 'v1.0-dpdp',
-        },
-      });
-    }
+    const customer = await prisma.customer.findUnique({ where: { phone: formattedPhone } });
+    // Do not create personal-data records from a login request and do not reveal account existence.
+    if (!customer) return { success: true, message: 'If an account exists for this number, a verification code has been sent.' };
 
     // Generate 6-digit OTP
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiration
-
-    // Store in cookie or temporary storage for verification
-    const cookieStore = await cookies();
-    cookieStore.set('neetha_customer_otp_challenge', JSON.stringify({
-      customerId: customer.id,
-      phone: formattedPhone,
-      otpCode,
-      expiresAt: otpExpires.getTime(),
-    }), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 10 * 60, // 10 mins
-      path: '/',
-    });
+    const otpCode = generateOtp();
+    await createCustomerOtpChallenge(customer.id, otpCode, 10 * 60);
 
     // Send OTP via WhatsApp / SMS dispatch
     await sendCustomerOtp(formattedPhone, otpCode, channel);
 
     return {
       success: true,
-      message: `OTP sent successfully to ${formattedPhone} via ${channel === 'WHATSAPP' ? 'WhatsApp' : 'SMS'}`,
-      // For development/preview convenience in local environments without active WhatsApp credits
-      devOtp: process.env.NODE_ENV !== 'production' ? otpCode : undefined,
+      message: 'If an account exists for this number, a verification code has been sent.',
     };
   } catch (err: any) {
     console.error('Customer OTP generation error:', err);
@@ -87,47 +51,19 @@ export async function verifyCustomerOtp(enteredOtp: string) {
     return { error: 'Please enter the complete 6-digit verification code' };
   }
 
-  const cookieStore = await cookies();
-  const challengeCookie = cookieStore.get('neetha_customer_otp_challenge');
-
-  if (!challengeCookie) {
-    return { error: 'OTP expired or not requested. Please request a new code.' };
-  }
-
   try {
-    const challenge = JSON.parse(challengeCookie.value);
-    if (Date.now() > challenge.expiresAt) {
-      return { error: 'This OTP has expired. Please request a new one.' };
-    }
-
-    if (challenge.otpCode !== enteredOtp.trim()) {
+    const customerId = await consumeCustomerOtpChallenge(enteredOtp.trim());
+    if (!customerId) {
       return { error: 'Incorrect OTP. Please check the code sent to your phone.' };
     }
 
-    const customer = await prisma.customer.findUnique({
-      where: { id: challenge.customerId },
-    });
+    const customer = await prisma.customer.findUnique({ where: { id: customerId } });
 
     if (!customer) {
       return { error: 'Customer record not found.' };
     }
 
-    // Set Customer session cookie (14 days)
-    cookieStore.set('neetha_customer_session', JSON.stringify({
-      id: customer.id,
-      name: customer.name,
-      phone: customer.phone,
-      email: customer.email,
-      address: customer.addressLine1,
-    }), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 24 * 14, // 14 days
-      path: '/',
-    });
-
-    // Clean up OTP challenge cookie
-    cookieStore.delete('neetha_customer_otp_challenge');
+    await setSession('CUSTOMER', customer.id, 60 * 60 * 24 * 14);
 
     return { success: true };
   } catch (err: any) {
@@ -140,23 +76,15 @@ export async function verifyCustomerOtp(enteredOtp: string) {
  * 3. Get Logged in Customer Session
  */
 export async function getCustomerSession() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get('neetha_customer_session');
-  if (!sessionCookie) return null;
-
-  try {
-    return JSON.parse(sessionCookie.value);
-  } catch {
-    return null;
-  }
+  const customer = await getCustomerIdentity();
+  return customer ? { ...customer, address: customer.addressLine1 } : null;
 }
 
 /**
  * 4. Customer Logout
  */
 export async function customerLogout() {
-  const cookieStore = await cookies();
-  cookieStore.delete('neetha_customer_session');
+  await revokeCurrentSession('CUSTOMER');
   return { success: true };
 }
 

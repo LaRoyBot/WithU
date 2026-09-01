@@ -2,6 +2,8 @@ import React from 'react';
 import { prisma } from '@/lib/prisma';
 import { decrypt } from '@/lib/crypto';
 import Link from 'next/link';
+import { getCustomerSession } from '@/actions/customer';
+import { notFound } from 'next/navigation';
 
 interface StatusPageProps {
   searchParams: Promise<{ id?: string }>;
@@ -31,16 +33,9 @@ export const revalidate = 0;
 
 export default async function BookingStatusPage({ searchParams }: StatusPageProps) {
   const { id } = await searchParams;
+  const session = await getCustomerSession();
 
-  if (!id) {
-    return (
-      <div className="p-8 text-center">
-        <h2 className="text-lg font-bold text-gray-900">Missing Booking Identifier</h2>
-        <p className="text-xs text-gray-500 mt-2">Please use the exact link sent to your mobile phone number.</p>
-        <div className="mt-4"><Link href="/" className="btn-primary text-xs">Return Home</Link></div>
-      </div>
-    );
-  }
+  if (!id || !session) notFound();
 
   let booking = null;
   let statusEvents: any[] = [];
@@ -57,6 +52,9 @@ export default async function BookingStatusPage({ searchParams }: StatusPageProp
         },
       },
     });
+    if (booking && booking.customerId !== session.id) {
+      booking = null;
+    }
     if (booking) {
       statusEvents = booking.statusEvents;
     }
@@ -69,9 +67,7 @@ export default async function BookingStatusPage({ searchParams }: StatusPageProp
     return (
       <div className="p-8 text-center">
         <h2 className="text-lg font-bold text-gray-900">Booking Record Not Found</h2>
-        <p className="text-xs text-gray-500 mt-2">
-          The booking ID <code className="bg-gray-100 px-1 py-0.5 rounded font-mono text-xs">{id}</code> could not be located in our active records.
-        </p>
+        <p className="text-xs text-gray-500 mt-2">Please sign in to your patient portal to view your booking.</p>
         <div className="mt-6">
           <Link href="/booking" className="btn-primary text-xs">Book a Visit</Link>
         </div>
@@ -164,7 +160,6 @@ export default async function BookingStatusPage({ searchParams }: StatusPageProp
                     </span>
                     <span>{new Date(event.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(event.createdAt).toLocaleDateString()}</span>
                   </div>
-                  {event.notes && <p className="text-gray-500 mt-1">{event.notes}</p>}
                 </div>
               </div>
             ))}

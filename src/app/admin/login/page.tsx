@@ -78,9 +78,6 @@ export default function AdminLoginPage() {
           </button>
         </form>
 
-        <div className="text-center text-[10px] text-gray-500 font-mono pt-4 border-t border-gray-700">
-          🔑 Default Seed Login: admin@neethanursing.com / admin123
-        </div>
       </div>
     </div>
   );

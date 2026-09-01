@@ -16,7 +16,7 @@ export default async function AdminLayout({
   // If no session and NOT loading the login page, the middleware handles the redirect.
   // But inside this layout, if we are logged in, we render the admin workspace.
   if (!session) {
-    return <>{children}</>;
+    redirect('/admin/login');
   }
 
   const handleLogoutAction = async () => {

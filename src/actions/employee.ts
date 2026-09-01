@@ -1,10 +1,9 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { createHash } from 'node:crypto';
-import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { decrypt } from '@/lib/crypto';
+import { getEmployeeIdentity, hashPassword, revokeCurrentSession, setSession, verifyPassword } from '@/lib/auth';
 
 /**
  * Log in Employee (Nurse) and set secure session cookie
@@ -32,8 +31,8 @@ export async function employeeLogin(formData: FormData) {
       return { error: 'Invalid login credentials or account not registered' };
     }
 
-    const hashedInput = createHash('sha256').update(password).digest('hex');
-    if (nurse.passwordHash !== hashedInput) {
+    const verification = await verifyPassword(password, nurse.passwordHash);
+    if (!verification.valid) {
       return { error: 'Invalid login credentials' };
     }
 
@@ -45,21 +44,10 @@ export async function employeeLogin(formData: FormData) {
       return { error: `Your account is currently ${nurse.status.toLowerCase()}. Please contact administration.` };
     }
 
-    // Set secure cookie
-    const cookieStore = await cookies();
-    cookieStore.set('neetha_employee_session', JSON.stringify({
-      id: nurse.id,
-      name: nurse.name,
-      email: nurse.email || nurse.phone,
-      phone: nurse.phone,
-      qualification: nurse.qualification,
-      baseLocation: nurse.baseLocation,
-    }), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 12, // 12 hours session
-      path: '/',
-    });
+    if (verification.needsRehash) {
+      await prisma.nurse.update({ where: { id: nurse.id }, data: { passwordHash: await hashPassword(password) } });
+    }
+    await setSession('EMPLOYEE', nurse.id, 60 * 60 * 12);
 
     return { success: true };
   } catch (err: any) {
@@ -72,8 +60,7 @@ export async function employeeLogin(formData: FormData) {
  * Log out Employee
  */
 export async function employeeLogout() {
-  const cookieStore = await cookies();
-  cookieStore.delete('neetha_employee_session');
+  await revokeCurrentSession('EMPLOYEE');
   return { success: true };
 }
 
@@ -81,14 +68,8 @@ export async function employeeLogout() {
  * Get active Employee Session from cookies
  */
 export async function getEmployeeSession() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get('neetha_employee_session');
-  if (!sessionCookie) return null;
-  try {
-    return JSON.parse(sessionCookie.value);
-  } catch {
-    return null;
-  }
+  const nurse = await getEmployeeIdentity();
+  return nurse && nurse.isApproved && (nurse.status === 'ACTIVE' || nurse.status === 'ON_DUTY') ? nurse : null;
 }
 
 /**

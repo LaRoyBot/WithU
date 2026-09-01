@@ -16,11 +16,9 @@ export async function callWhatsAppApi(payload: WhatsAppPayload): Promise<boolean
   const apiKey = process.env.WHATSAPP_API_KEY;
   const endpoint = process.env.WHATSAPP_API_ENDPOINT; // e.g. https://api.aisensy.com/v1/send
 
-  console.log(`[WHATSAPP DISPATCH LOG] Target: ${payload.phoneNumber} | Template: ${payload.templateName} | Params:`, payload.parameters);
-
   if (!apiKey || !endpoint) {
-    console.log('[WHATSAPP DISPATCH LOG] Integration credentials missing. Logging to console only (stub mode).');
-    return true;
+    console.error('[WHATSAPP DISPATCH ERROR] Messaging integration is not configured.');
+    return false;
   }
 
   try {
@@ -185,8 +183,6 @@ export async function sendCustomerOtp(
   channel: 'WHATSAPP' | 'SMS' = 'WHATSAPP'
 ) {
   const formattedPhone = phone.startsWith('+') ? phone : `+91${phone}`;
-
-  console.log(`[CUSTOMER AUTH OTP] Channel: ${channel} | Phone: ${formattedPhone} | Code: ${otpCode}`);
 
   return callWhatsAppApi({
     phoneNumber: formattedPhone,

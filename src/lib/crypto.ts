@@ -1,10 +1,13 @@
 import { randomBytes, createCipheriv, createDecipheriv } from 'node:crypto';
 
 const ALGORITHM = 'aes-256-gcm';
-// Fallback key for testing/dev (must be 32 bytes / 64 hex characters)
-const DEFAULT_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
-
-const getEncryptionKey = (): Buffer => Buffer.from(process.env.ENCRYPTION_KEY || DEFAULT_KEY, 'hex');
+const getEncryptionKey = (): Buffer => {
+  const key = process.env.ENCRYPTION_KEY;
+  if (!key || !/^[a-fA-F0-9]{64}$/.test(key)) {
+    throw new Error('ENCRYPTION_KEY must be configured as a 32-byte hexadecimal key');
+  }
+  return Buffer.from(key, 'hex');
+};
 
 /**
  * Encrypts a string using AES-256-GCM
@@ -35,10 +38,7 @@ export function decrypt(encryptedText: string): string {
   if (!encryptedText) return '';
   try {
     const parts = encryptedText.split(':');
-    if (parts.length !== 3) {
-      // Fallback: If not formatted, it might be plain text from seeding/dev
-      return encryptedText;
-    }
+    if (parts.length !== 3) throw new Error('Malformed encrypted value');
 
     const [ivHex, encryptedHex, authTagHex] = parts;
     const iv = Buffer.from(ivHex, 'hex');
@@ -52,8 +52,7 @@ export function decrypt(encryptedText: string): string {
     decrypted += decipher.final('utf8');
     return decrypted;
   } catch (err: any) {
-    console.error('Decryption failed:', err.message);
-    // If decryption fails, return placeholder or error indicating security boundary
-    return '[ENCRYPTED_DATA_DECRYPTION_FAILED]';
+    console.error('Decryption failed');
+    throw new Error('Could not decrypt sensitive details');
   }
 }

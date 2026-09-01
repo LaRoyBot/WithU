@@ -19,6 +19,32 @@ model AdminUser {
   statusLogs   BookingStatusEvent[]
 }
 
+model AuthSession {
+  id          String   @id @default(uuid())
+  tokenHash   String   @unique
+  subjectType String
+  subjectId   String
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  revokedAt   DateTime?
+
+  @@index([subjectType, subjectId])
+  @@index([expiresAt])
+}
+
+model OtpChallenge {
+  id          String   @id @default(uuid())
+  tokenHash   String   @unique
+  customerId  String
+  codeHash    String
+  expiresAt   DateTime
+  attempts    Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([customerId])
+  @@index([expiresAt])
+}
+
 model Customer {
   id               String    @id @default(uuid())
   name             String

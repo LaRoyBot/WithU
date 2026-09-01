@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { submitPublicBooking } from '@/actions/booking';
+import { submitPublicBooking, verifyBookingOtp } from '@/actions/booking';
 import Link from 'next/link';
 import Image from 'next/image';
 import ModernPaymentSection from './ModernPaymentSection';
@@ -51,17 +51,18 @@ export default function TwoStepBookingForm({ services }: TwoStepBookingFormProps
   const [message, setMessage] = useState('');
 
   // Step 2 State
-  const [prescriptionUrl, setPrescriptionUrl] = useState('');
-  const [prescriptionName, setPrescriptionName] = useState('');
   const [promoCode, setPromoCode] = useState('');
   const [promoDiscountApplied, setPromoDiscountApplied] = useState(false);
   const [paymentMode, setPaymentMode] = useState<'PAY_NOW' | 'PAY_AFTER'>('PAY_NOW');
   const [utrNumber, setUtrNumber] = useState('');
+  const [consentGiven, setConsentGiven] = useState(false);
 
   // Submission & UI State
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submittedBooking, setSubmittedBooking] = useState<any>(null);
+  const [bookingOtp, setBookingOtp] = useState('');
+  const [bookingVerified, setBookingVerified] = useState(false);
 
   // Selected Service Price Computation
   const currentService = services.find((s) => s.id === selectedServiceId) || services[0];
@@ -92,17 +93,6 @@ export default function TwoStepBookingForm({ services }: TwoStepBookingFormProps
     setStep(2);
   };
 
-  // Mock File Upload (Prescription)
-  const handlePrescriptionUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setPrescriptionName(file.name);
-      // In production, upload to S3/Cloudinary/Blob; here we store a verifiable mock data URL
-      const mockBlobUrl = `https://storage.neethacare.in/prescriptions/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-      setPrescriptionUrl(mockBlobUrl);
-    }
-  };
-
   // Handle Promo Code Apply
   const handleApplyPromo = () => {
     if (promoCode.trim().toUpperCase() === 'WITHU10') {
@@ -120,6 +110,12 @@ export default function TwoStepBookingForm({ services }: TwoStepBookingFormProps
     setLoading(true);
     setError(null);
 
+    if (!consentGiven) {
+      setError('Please provide consent before submitting your booking.');
+      setLoading(false);
+      return;
+    }
+
     const activeArea = selectedArea === 'Other / Custom Locality' ? (customArea.trim() || 'Hyderabad') : selectedArea;
 
     try {
@@ -129,10 +125,10 @@ export default function TwoStepBookingForm({ services }: TwoStepBookingFormProps
         area: activeArea,
         serviceId: selectedServiceId,
         message: message.trim(),
-        prescriptionUrl: prescriptionUrl || undefined,
         promoCode: promoDiscountApplied ? 'WITHU10' : promoCode.trim() || undefined,
         paymentMode,
         utrNumber: utrNumber.trim() || undefined,
+        consentGiven: true,
       });
 
       if (res.success) {
@@ -149,6 +145,15 @@ export default function TwoStepBookingForm({ services }: TwoStepBookingFormProps
 
   // Success Confirmation Screen
   if (submittedBooking) {
+    const verifySubmittedBooking = async () => {
+      const result = await verifyBookingOtp(submittedBooking.bookingId, bookingOtp);
+      if (result.success) {
+        setBookingVerified(true);
+        setError(null);
+      } else {
+        setError(result.error || 'Unable to verify your booking.');
+      }
+    };
     return (
       <div className="bg-slate-950/90 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/10 w-full max-w-lg mx-auto text-center space-y-6 animate-in fade-in zoom-in-95 duration-200">
         <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-3xl border border-emerald-500/30">
@@ -184,6 +189,13 @@ export default function TwoStepBookingForm({ services }: TwoStepBookingFormProps
             <span className="text-emerald-400 font-semibold">Sent to Admin WhatsApp</span>
           </div>
         </div>
+
+        {!bookingVerified && (
+          <div className="flex gap-2">
+            <input value={bookingOtp} onChange={(e) => setBookingOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" placeholder="Enter 6-digit verification code" className="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-900 px-3 py-3 text-center font-mono text-sm text-white focus:border-purple-500 focus:outline-none" />
+            <button type="button" onClick={verifySubmittedBooking} disabled={bookingOtp.length !== 6} className="rounded-xl bg-purple-600 px-4 py-3 text-xs font-bold uppercase tracking-wide text-white disabled:opacity-50">Verify</button>
+          </div>
+        )}
 
         <div className="pt-2">
           <Link
@@ -402,13 +414,13 @@ export default function TwoStepBookingForm({ services }: TwoStepBookingFormProps
                 type="file"
                 id="prescription-file"
                 accept="image/*,.pdf"
-                onChange={handlePrescriptionUpload}
+                disabled
                 className="hidden"
               />
               <label htmlFor="prescription-file" className="cursor-pointer block">
                 <div className="text-2xl mb-1">📄</div>
                 <div className="text-xs font-semibold text-purple-400 hover:text-purple-300">
-                  {prescriptionName ? `Selected: ${prescriptionName}` : 'Click to Upload Prescription / Medical File'}
+                  Prescription uploads are temporarily unavailable
                 </div>
                 <div className="text-[10px] text-slate-500 mt-0.5">PDF, PNG, JPG accepted (up to 10MB)</div>
               </label>
@@ -424,6 +436,11 @@ export default function TwoStepBookingForm({ services }: TwoStepBookingFormProps
             utrNumber={utrNumber}
             onUtrChange={setUtrNumber}
           />
+
+          <label className="flex gap-3 items-start rounded-xl border border-slate-700 bg-slate-900/70 p-3 text-xs text-slate-300">
+            <input type="checkbox" checked={consentGiven} onChange={(e) => setConsentGiven(e.target.checked)} className="mt-0.5 h-4 w-4" />
+            <span>I consent to processing the details in this request to arrange nursing care. Prescription uploads are temporarily unavailable while secure storage is being completed.</span>
+          </label>
 
           {/* Promo Code Entry Box */}
           <div>

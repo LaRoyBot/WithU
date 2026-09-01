@@ -1,14 +1,16 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { encrypt, decrypt } from '@/lib/crypto';
-import { bookingDetailsSchema, type BookingDetailsInput } from '@/lib/validations/booking';
-import { sendBookingConfirmation, sendAdminNewBookingAlert } from '@/lib/whatsapp';
+import { encrypt } from '@/lib/crypto';
+import { bookingDetailsSchema, publicBookingSchema, type BookingDetailsInput } from '@/lib/validations/booking';
+import { sendBookingConfirmation, sendCustomerOtp } from '@/lib/whatsapp';
 import { revalidatePath } from 'next/cache';
+import { randomBytes, randomInt } from 'node:crypto';
+import { allowAttempt } from '@/lib/rate-limit';
 
 // Helper to generate a random 4-character uppercase alphanumeric string for booking ID suffix
 const generateBookingNumber = (): string =>
-  `NNS-${Array.from({ length: 4 }, () => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[Math.floor(Math.random() * 36)]).join('')}`;
+  `NNS-${randomBytes(5).toString('hex').toUpperCase()}`;
 
 /**
  * Flow 5: Public Two-Step Booking Form Server Action
@@ -23,14 +25,14 @@ export async function submitPublicBooking(data: {
   customService?: string;
   dateNeeded?: string;
   message?: string;
-  prescriptionUrl?: string;
   promoCode?: string;
   paymentMode?: 'PAY_NOW' | 'PAY_AFTER';
   utrNumber?: string;
+  consentGiven?: true;
 }) {
-  if (!data.name?.trim() || !data.phone?.trim() || !data.area?.trim()) {
-    return { success: false, error: 'Name, phone number, and area are required.' };
-  }
+  const validated = publicBookingSchema.safeParse(data);
+  if (!validated.success) return { success: false, error: 'Please provide valid booking details and consent to data processing.' };
+  data = validated.data;
 
   // Normalize phone number to E.164 (+91)
   const rawPhone = data.phone.replace(/\D/g, '');
@@ -38,44 +40,17 @@ export async function submitPublicBooking(data: {
     return { success: false, error: 'Please enter a valid 10-digit Indian phone number.' };
   }
   const cleanPhone = rawPhone.length === 10 ? `+91${rawPhone}` : (data.phone.startsWith('+') ? data.phone : `+${rawPhone}`);
+  if (!allowAttempt('public-booking', cleanPhone, 3, 60 * 60 * 1000)) {
+    return { success: false, error: 'Too many booking attempts. Please try again later.' };
+  }
 
   try {
-    // 1. Fetch Service and compute initial price (or fallback for Custom / Other service)
-    let service = null;
-    if (data.serviceId && data.serviceId !== 'other') {
-      try {
-        service = await prisma.service.findUnique({
-          where: { id: data.serviceId },
-        });
-      } catch (err) {
-        console.warn('Could not fetch service by ID:', err);
-      }
-    }
+    const service = await prisma.service.findFirst({ where: { id: data.serviceId, isActive: true } });
+    if (!service) return { success: false, error: 'The selected service is unavailable.' };
 
-    // If no serviceId was selected, or "other" was chosen, find or create generic consultation service
-    if (!service) {
-      service = await prisma.service.findFirst({
-        where: { isActive: true },
-        orderBy: { name: 'asc' },
-      });
+    const serviceDisplayName = service.name;
 
-      // If still no service in database, fallback default
-      if (!service) {
-        service = {
-          id: 'custom-general-care',
-          name: data.customService?.trim() || 'General Home Nursing Consultation',
-          basePrice: 500 as any,
-          priceUnit: 'visit',
-          isActive: true,
-        } as any;
-      }
-    }
-
-    const serviceDisplayName = data.serviceId === 'other' && data.customService?.trim()
-      ? `Other: ${data.customService.trim()}`
-      : (data.serviceId ? service.name : 'Home Nursing Consultation');
-
-    let calculatedPrice = Number(service.basePrice) || 500;
+    let calculatedPrice = Number(service.basePrice);
 
     // Apply promo code discount if valid
     if (data.promoCode && data.promoCode.trim().toUpperCase() === 'WITHU10') {
@@ -87,20 +62,20 @@ export async function submitPublicBooking(data: {
       where: { phone: cleanPhone },
       update: {
         name: data.name.trim(),
-        addressLine1: data.area?.trim() || 'Hyderabad Area',
+        addressLine1: data.area!.trim(),
         consentGiven: true,
         consentTimestamp: new Date(),
-        consentIpAddress: '127.0.0.1',
+        consentIpAddress: null,
         consentVersion: 'v1.0-dpdp',
       },
       create: {
         name: data.name.trim(),
         phone: cleanPhone,
-        addressLine1: data.area?.trim() || 'Hyderabad Area',
+        addressLine1: data.area!.trim(),
         pincode: '500001',
         consentGiven: true,
         consentTimestamp: new Date(),
-        consentIpAddress: '127.0.0.1',
+        consentIpAddress: null,
         consentVersion: 'v1.0-dpdp',
       },
     });
@@ -128,7 +103,7 @@ export async function submitPublicBooking(data: {
     ].filter(Boolean).join(' | ');
 
     const clinicalNotes = [
-      `Area/Location: ${data.area.trim()}`,
+      `Area/Location: ${data.area!.trim()}`,
       data.dateNeeded ? `Date Needed: ${data.dateNeeded}` : null,
       data.customService ? `Requested Custom Service: ${data.customService.trim()}` : null,
       paymentNotes,
@@ -153,15 +128,15 @@ export async function submitPublicBooking(data: {
         shiftType: 'DAY_12HR',
         totalDays: 1,
         totalAmount: calculatedPrice,
-        area: data.area.trim(),
+        area: data.area!.trim(),
         promoCode: data.promoCode?.trim() || null,
-        prescriptionUrl: data.prescriptionUrl || null,
+        prescriptionUrl: null,
         patientName: encryptedPatientName,
         patientAge: 45, // default
         patientGender: 'Other',
         medicalConditions: encryptedConditions,
         specialInstructions: encryptedInstructions,
-        status: 'CONFIRMED', // Immediately placed in open job board / queue
+        status: 'PENDING_OTP',
       },
     });
 
@@ -169,34 +144,18 @@ export async function submitPublicBooking(data: {
     await prisma.bookingStatusEvent.create({
       data: {
         bookingId: booking.id,
-        fromStatus: 'PENDING_OTP',
-        toStatus: 'CONFIRMED',
-        notes: `Public booking submitted by customer. Area: ${data.area}, Service: ${serviceDisplayName}, Promo: ${data.promoCode || 'None'}`,
+        fromStatus: 'PENDING',
+        toStatus: 'PENDING_OTP',
+        notes: 'Public booking submitted; awaiting phone verification.',
       },
     });
 
-    // 7. Automated Forwarding to Admin WhatsApp
+    const otpCode = String(randomInt(100000, 1000000));
+    await prisma.booking.update({ where: { id: booking.id }, data: { otpCode, otpExpires: new Date(Date.now() + 5 * 60 * 1000) } });
     try {
-      await sendAdminNewBookingAlert({
-        bookingNumber,
-        customerName: data.name.trim(),
-        customerPhone: cleanPhone,
-        area: data.area.trim(),
-        serviceName: serviceDisplayName,
-        price: calculatedPrice,
-        promoCode: data.promoCode?.trim(),
-        message: clinicalNotes,
-        hasPrescription: !!data.prescriptionUrl,
-      });
-    } catch (waErr) {
-      console.warn('Admin WhatsApp dispatch error (logged safely):', waErr);
-    }
-
-    // 8. Send immediate acknowledgement to customer
-    try {
-      await sendBookingConfirmation(cleanPhone, data.name.trim(), bookingNumber, serviceDisplayName);
-    } catch (custWaErr) {
-      console.warn('Customer WhatsApp acknowledgement error:', custWaErr);
+      await sendCustomerOtp(cleanPhone, otpCode);
+    } catch {
+      return { success: false, error: 'Could not send verification code. Please try again later.' };
     }
 
     revalidatePath('/admin');
@@ -210,6 +169,7 @@ export async function submitPublicBooking(data: {
       customerPhone: cleanPhone,
       serviceName: serviceDisplayName,
       totalAmount: calculatedPrice,
+      requiresVerification: true,
     };
   } catch (err: any) {
     console.error('Public booking submission error:', err);
@@ -285,7 +245,7 @@ export async function createBookingRecord(input: BookingDetailsInput) {
     });
 
     // 4. Generate random OTP (6-digits)
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpCode = String(randomInt(100000, 1000000));
     const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes expiration
 
     // 5. Encrypt Sensitive Clinical Data (PHI)
@@ -331,7 +291,7 @@ export async function createBookingRecord(input: BookingDetailsInput) {
       },
     });
 
-    console.log(`[SMS OTP SERVICE MOCK] OTP for booking ${bookingNumber} (Phone: ${data.customerPhone}) is: ${otpCode}`);
+    await sendCustomerOtp(data.customerPhone, otpCode);
 
     return { success: true, bookingId: booking.id };
   } catch (error: any) {
@@ -346,6 +306,9 @@ export async function createBookingRecord(input: BookingDetailsInput) {
 export async function verifyBookingOtp(bookingId: string, otpCode: string) {
   if (!bookingId || !otpCode) {
     return { success: false, error: 'Invalid verification details' };
+  }
+  if (!allowAttempt('booking-otp', bookingId, 5, 15 * 60 * 1000)) {
+    return { success: false, error: 'Too many verification attempts. Please request a new code later.' };
   }
 
   try {
@@ -409,6 +372,9 @@ export async function verifyBookingOtp(bookingId: string, otpCode: string) {
  * Step 3: Resend OTP Server Action
  */
 export async function resendBookingOtp(bookingId: string) {
+  if (!allowAttempt('booking-otp-resend', bookingId, 3, 15 * 60 * 1000)) {
+    return { success: false, error: 'Too many resend attempts. Please try again later.' };
+  }
   try {
     const booking = await prisma.booking.findUnique({
       where: { id: bookingId },
@@ -419,7 +385,7 @@ export async function resendBookingOtp(bookingId: string) {
       return { success: false, error: 'Invalid booking state' };
     }
 
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpCode = String(randomInt(100000, 1000000));
     const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
 
     await prisma.booking.update({
@@ -430,7 +396,7 @@ export async function resendBookingOtp(bookingId: string) {
       },
     });
 
-    console.log(`[SMS OTP SERVICE MOCK] Resent OTP for booking ${booking.bookingNumber} (Phone: ${booking.customer.phone}) is: ${otpCode}`);
+    await sendCustomerOtp(booking.customer.phone, otpCode);
 
     return { success: true };
   } catch (err: any) {

@@ -38,3 +38,17 @@ export const bookingDetailsSchema = z.object({
 });
 
 export type BookingDetailsInput = z.infer<typeof bookingDetailsSchema>;
+
+export const publicBookingSchema = z.object({
+  name: z.string().trim().min(2).max(100),
+  phone: z.string().trim().min(10).max(20),
+  area: z.string().trim().min(2).max(200),
+  serviceId: z.string().uuid(),
+  customService: z.string().trim().max(500).optional(),
+  dateNeeded: z.string().trim().max(30).optional(),
+  message: z.string().trim().max(2_000).optional(),
+  promoCode: z.string().trim().max(32).optional(),
+  paymentMode: z.enum(['PAY_NOW', 'PAY_AFTER']).optional(),
+  utrNumber: z.string().trim().max(64).optional(),
+  consentGiven: z.literal(true),
+});

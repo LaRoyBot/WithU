@@ -30,9 +30,6 @@ export default function CustomerLoginForm() {
     } else {
       setOtpSent(true);
       setSuccessMsg(res.message || 'OTP sent successfully!');
-      if (res.devOtp) {
-        setDevOtpHint(res.devOtp);
-      }
     }
   };
 
