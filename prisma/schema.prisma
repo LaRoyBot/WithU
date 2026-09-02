@@ -163,6 +163,11 @@ model Booking {
 
   statusEvents        BookingStatusEvent[]
   jobClaims           JobClaim[]
+
+  @@index([status, nurseId])
+  @@index([customerId])
+  @@index([serviceId])
+  @@index([createdAt])
 }
 
 model BookingStatusEvent {

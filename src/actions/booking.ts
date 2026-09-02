@@ -1,12 +1,16 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { encrypt } from '@/lib/crypto';
+import { decrypt, encrypt } from '@/lib/crypto';
 import { bookingDetailsSchema, publicBookingSchema, type BookingDetailsInput } from '@/lib/validations/booking';
 import { sendBookingConfirmation, sendCustomerOtp } from '@/lib/whatsapp';
 import { revalidatePath } from 'next/cache';
-import { randomBytes, randomInt } from 'node:crypto';
+import { createHash, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 import { allowAttempt } from '@/lib/rate-limit';
+
+// Helper to hash verification OTP codes before DB storage
+const hashOtp = (code: string): string =>
+  createHash('sha256').update(code).digest('hex');
 
 // Helper to generate a random 4-character uppercase alphanumeric string for booking ID suffix
 const generateBookingNumber = (): string =>
@@ -57,28 +61,25 @@ export async function submitPublicBooking(data: {
       calculatedPrice = Math.max(0, calculatedPrice * 0.9); // 10% discount
     }
 
-    // 2. Upsert Customer Record
-    const customer = await prisma.customer.upsert({
+    // 2. Upsert Customer Record without overwriting established profiles before OTP verification
+    const existingCustomer = await prisma.customer.findUnique({
       where: { phone: cleanPhone },
-      update: {
-        name: data.name.trim(),
-        addressLine1: data.area!.trim(),
-        consentGiven: true,
-        consentTimestamp: new Date(),
-        consentIpAddress: null,
-        consentVersion: 'v1.0-dpdp',
-      },
-      create: {
-        name: data.name.trim(),
-        phone: cleanPhone,
-        addressLine1: data.area!.trim(),
-        pincode: '500001',
-        consentGiven: true,
-        consentTimestamp: new Date(),
-        consentIpAddress: null,
-        consentVersion: 'v1.0-dpdp',
-      },
     });
+
+    const customer = existingCustomer
+      ? existingCustomer
+      : await prisma.customer.create({
+          data: {
+            name: data.name.trim(),
+            phone: cleanPhone,
+            addressLine1: data.area!.trim(),
+            pincode: '500001',
+            consentGiven: true,
+            consentTimestamp: new Date(),
+            consentIpAddress: null,
+            consentVersion: 'v1.0-dpdp',
+          },
+        });
 
     // 3. Generate unique booking number
     let bookingNumber = generateBookingNumber();
@@ -151,7 +152,13 @@ export async function submitPublicBooking(data: {
     });
 
     const otpCode = String(randomInt(100000, 1000000));
-    await prisma.booking.update({ where: { id: booking.id }, data: { otpCode, otpExpires: new Date(Date.now() + 5 * 60 * 1000) } });
+    await prisma.booking.update({
+      where: { id: booking.id },
+      data: {
+        otpCode: hashOtp(otpCode),
+        otpExpires: new Date(Date.now() + 5 * 60 * 1000),
+      },
+    });
     try {
       await sendCustomerOtp(cleanPhone, otpCode);
     } catch {
@@ -216,33 +223,27 @@ export async function createBookingRecord(input: BookingDetailsInput) {
     // Pricing calculation
     const totalAmount = Number(service.basePrice) * totalDays;
 
-    // 3. Upsert Customer
-    const customer = await prisma.customer.upsert({
+    // 3. Upsert Customer without mutating existing profile before verification
+    const existingCustomer = await prisma.customer.findUnique({
       where: { phone: data.customerPhone },
-      update: {
-        name: data.customerName,
-        email: data.customerEmail || null,
-        addressLine1: data.addressLine1,
-        addressLine2: data.addressLine2 || null,
-        pincode: data.pincode,
-        consentGiven: true,
-        consentTimestamp: new Date(),
-        consentIpAddress: '127.0.0.1',
-        consentVersion: 'v1.0-dpdp',
-      },
-      create: {
-        name: data.customerName,
-        phone: data.customerPhone,
-        email: data.customerEmail || null,
-        addressLine1: data.addressLine1,
-        addressLine2: data.addressLine2 || null,
-        pincode: data.pincode,
-        consentGiven: true,
-        consentTimestamp: new Date(),
-        consentIpAddress: '127.0.0.1',
-        consentVersion: 'v1.0-dpdp',
-      },
     });
+
+    const customer = existingCustomer
+      ? existingCustomer
+      : await prisma.customer.create({
+          data: {
+            name: data.customerName,
+            phone: data.customerPhone,
+            email: data.customerEmail || null,
+            addressLine1: data.addressLine1,
+            addressLine2: data.addressLine2 || null,
+            pincode: data.pincode,
+            consentGiven: true,
+            consentTimestamp: new Date(),
+            consentIpAddress: '127.0.0.1',
+            consentVersion: 'v1.0-dpdp',
+          },
+        });
 
     // 4. Generate random OTP (6-digits)
     const otpCode = String(randomInt(100000, 1000000));
@@ -269,7 +270,7 @@ export async function createBookingRecord(input: BookingDetailsInput) {
       }
     }
 
-    // 7. Create Booking row in PENDING_OTP status
+    // 7. Create Booking row in PENDING_OTP status with hashed OTP
     const booking = await prisma.booking.create({
       data: {
         bookingNumber,
@@ -286,7 +287,7 @@ export async function createBookingRecord(input: BookingDetailsInput) {
         medicalConditions: encryptedMedicalConditions,
         specialInstructions: encryptedSpecialInstructions,
         status: 'PENDING_OTP',
-        otpCode,
+        otpCode: hashOtp(otpCode),
         otpExpires,
       },
     });
@@ -325,8 +326,10 @@ export async function verifyBookingOtp(bookingId: string, otpCode: string) {
       return { success: false, error: 'This booking has already been verified or processed' };
     }
 
-    // Verify OTP code & expiration
-    if (booking.otpCode !== otpCode) {
+    // Verify OTP code & expiration (supports SHA-256 hashed OTPs and legacy plain codes)
+    const providedOtpHash = hashOtp(otpCode);
+    const isValidOtp = booking.otpCode === providedOtpHash || booking.otpCode === otpCode;
+    if (!isValidOtp) {
       return { success: false, error: 'Invalid verification code' };
     }
 
@@ -334,7 +337,14 @@ export async function verifyBookingOtp(bookingId: string, otpCode: string) {
       return { success: false, error: 'Verification code has expired. Please request a new one.' };
     }
 
-    // Update Booking status to CONFIRMED and clear OTP columns
+    let customerAddress = booking.area || booking.customer.addressLine1;
+    let customerName = booking.customer.name;
+    try {
+      const decryptedName = decrypt(booking.patientName);
+      if (decryptedName) customerName = decryptedName;
+    } catch {}
+
+    // Update Booking status to CONFIRMED, clear OTP columns, and update customer profile securely upon verification
     await prisma.$transaction([
       prisma.booking.update({
         where: { id: bookingId },
@@ -342,6 +352,16 @@ export async function verifyBookingOtp(bookingId: string, otpCode: string) {
           status: 'CONFIRMED',
           otpCode: null,
           otpExpires: null,
+        },
+      }),
+      prisma.customer.update({
+        where: { id: booking.customerId },
+        data: {
+          name: customerName,
+          addressLine1: customerAddress,
+          consentGiven: true,
+          consentTimestamp: new Date(),
+          consentVersion: 'v1.0-dpdp',
         },
       }),
       prisma.bookingStatusEvent.create({
@@ -391,7 +411,7 @@ export async function resendBookingOtp(bookingId: string) {
     await prisma.booking.update({
       where: { id: bookingId },
       data: {
-        otpCode,
+        otpCode: hashOtp(otpCode),
         otpExpires,
       },
     });

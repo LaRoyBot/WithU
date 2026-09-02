@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { sendNurseAssignment, sendBookingCompleted, sendNurseJobDispatch } from '@/lib/whatsapp';
-import { decrypt } from '@/lib/crypto';
+import { decrypt, encrypt } from '@/lib/crypto';
 import { getAdminIdentity, hashPassword, revokeCurrentSession, setSession, verifyPassword } from '@/lib/auth';
 
 /**
@@ -124,6 +124,9 @@ export async function assignNurse(bookingId: string, nurseId: string) {
 
     if (!booking) return { error: 'Booking not found' };
     if (!nurse) return { error: 'Selected nurse not found' };
+    if (booking.nurseId || (booking.status !== 'CONFIRMED' && booking.status !== 'NURSE_ASSIGNED')) {
+      return { error: 'This booking has already been assigned or is in an invalid state.' };
+    }
 
     await prisma.$transaction([
       prisma.booking.update({
@@ -202,6 +205,9 @@ export async function approveJobClaim(claimId: string) {
     });
 
     if (!claim) return { error: 'Claim not found' };
+    if (claim.booking.nurseId || claim.booking.status !== 'CONFIRMED') {
+      return { error: 'This job has already been assigned or is no longer open for assignment.' };
+    }
 
     await prisma.$transaction([
       prisma.jobClaim.update({
@@ -320,6 +326,9 @@ export async function upsertNurseRoster(data: {
       passwordHash = await hashPassword(data.password.trim());
     }
 
+    let encryptedPan = data.panNumber ? (data.panNumber.includes(':') ? data.panNumber : encrypt(data.panNumber.trim().toUpperCase())) : null;
+    let encryptedAadhar = data.aadharName ? (data.aadharName.includes(':') ? data.aadharName : encrypt(data.aadharName.trim())) : null;
+
     if (data.id) {
       const updateData: any = {
         name: data.name,
@@ -330,8 +339,8 @@ export async function upsertNurseRoster(data: {
         experienceYears: data.experienceYears,
         skills: data.skills,
         baseLocation: data.baseLocation || null,
-        panNumber: data.panNumber || null,
-        aadharName: data.aadharName || null,
+        panNumber: encryptedPan,
+        aadharName: encryptedAadhar,
         certificationDocUrl: data.certificationDocUrl || null,
         status: data.status,
       };
@@ -361,8 +370,8 @@ export async function upsertNurseRoster(data: {
           experienceYears: data.experienceYears,
           skills: data.skills,
           baseLocation: data.baseLocation || null,
-          panNumber: data.panNumber || null,
-          aadharName: data.aadharName || null,
+          panNumber: encryptedPan,
+          aadharName: encryptedAadhar,
           certificationDocUrl: data.certificationDocUrl || null,
           isApproved: data.isApproved !== undefined ? data.isApproved : true,
           status: data.status,
