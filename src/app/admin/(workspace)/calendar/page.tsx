@@ -31,28 +31,36 @@ export default async function AdminCalendarPage() {
       },
     });
 
-    bookings = rawBookings.map((b) => ({
-      id: b.id,
-      bookingNumber: b.bookingNumber,
-      startDate: b.startDate.toISOString(),
-      endDate: b.endDate.toISOString(),
-      status: b.status,
-      patientName: decrypt(b.patientName),
-      customer: {
-        name: b.customer.name,
-        phone: b.customer.phone,
-      },
-      service: {
-        name: b.service.name,
-      },
-      nurse: b.nurse
-        ? {
-            id: b.nurse.id,
-            name: b.nurse.name,
-            phone: b.nurse.phone,
-          }
-        : null,
-    }));
+    bookings = rawBookings.map((b) => {
+      let patientName = b.customer.name;
+      try {
+        const decrypted = decrypt(b.patientName);
+        if (decrypted) patientName = decrypted;
+      } catch {}
+
+      return {
+        id: b.id,
+        bookingNumber: b.bookingNumber,
+        startDate: b.startDate.toISOString(),
+        endDate: b.endDate.toISOString(),
+        status: b.status,
+        patientName,
+        customer: {
+          name: b.customer.name,
+          phone: b.customer.phone,
+        },
+        service: {
+          name: b.service.name,
+        },
+        nurse: b.nurse
+          ? {
+              id: b.nurse.id,
+              name: b.nurse.name,
+              phone: b.nurse.phone,
+            }
+          : null,
+      };
+    });
   } catch (err) {
     console.error('Error fetching calendar bookings:', err);
   }

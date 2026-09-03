@@ -71,10 +71,15 @@ export async function updateBookingStatus(
 
     if (!booking) return { error: 'Booking not found' };
 
+    const updateData: { status: string; nurseId?: string | null } = { status: newStatus };
+    if (newStatus === 'CONFIRMED' || newStatus === 'CANCELLED') {
+      updateData.nurseId = null;
+    }
+
     await prisma.$transaction([
       prisma.booking.update({
         where: { id: bookingId },
-        data: { status: newStatus },
+        data: updateData,
       }),
       prisma.bookingStatusEvent.create({
         data: {
@@ -124,6 +129,9 @@ export async function assignNurse(bookingId: string, nurseId: string) {
 
     if (!booking) return { error: 'Booking not found' };
     if (!nurse) return { error: 'Selected nurse not found' };
+    if (!nurse.isApproved || nurse.status !== 'ACTIVE') {
+      return { error: 'Nurse must be approved and active to be assigned.' };
+    }
     if (booking.nurseId || (booking.status !== 'CONFIRMED' && booking.status !== 'NURSE_ASSIGNED')) {
       return { error: 'This booking has already been assigned or is in an invalid state.' };
     }
@@ -156,25 +164,21 @@ export async function assignNurse(bookingId: string, nurseId: string) {
       nurse.phone
     );
 
-    let clinicalInfo = booking.area || booking.customer.addressLine1;
+    let locationAddress = booking.area || booking.customer.addressLine1;
     let patientDisplayName = booking.customer.name;
     try {
       const decryptedName = decrypt(booking.patientName);
       if (decryptedName) patientDisplayName = decryptedName;
-      const decryptedConditions = decrypt(booking.medicalConditions);
-      if (decryptedConditions) {
-        clinicalInfo += ` | Care Notes: ${decryptedConditions}`;
-      }
     } catch {}
 
-    // Send dispatch to nurse: location and address details only (NO patient phone number)
+    // Send dispatch to nurse: location and locality address details only (NO patient phone number, NO raw PHI over SMS/WhatsApp)
     await sendNurseJobDispatch(
       nurse.phone,
       nurse.name,
       booking.bookingNumber,
       booking.service.name,
       patientDisplayName,
-      clinicalInfo
+      locationAddress
     );
 
     revalidatePath('/admin');
@@ -205,6 +209,12 @@ export async function approveJobClaim(claimId: string) {
     });
 
     if (!claim) return { error: 'Claim not found' };
+    if (claim.status !== 'PENDING_APPROVAL') {
+      return { error: 'This claim is no longer pending approval.' };
+    }
+    if (!claim.nurse.isApproved || claim.nurse.status !== 'ACTIVE') {
+      return { error: 'The claiming caregiver is not currently active and approved.' };
+    }
     if (claim.booking.nurseId || claim.booking.status !== 'CONFIRMED') {
       return { error: 'This job has already been assigned or is no longer open for assignment.' };
     }
