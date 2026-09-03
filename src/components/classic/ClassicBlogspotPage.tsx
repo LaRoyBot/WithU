@@ -1,142 +1,61 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
+import Link from 'next/link';
 
 export default function ClassicBlogspotPage() {
-  useEffect(() => {
-    // 1. Setup Login Modal Interactions
-    const loginBtn = document.getElementById('loginBtn');
-    const loginModal = document.getElementById('loginModal');
-    const closeBtn = document.getElementById('closeBtn');
-    const loginForm = document.getElementById('loginForm');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState<{ text: string; bg: string; color: string } | null>(null);
 
-    if (loginBtn && loginModal) {
-      loginBtn.onclick = () => {
-        loginModal.style.display = 'flex';
-      };
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setMessage({ text: 'Submitting...', bg: 'beige', color: 'green' });
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const keyValuePairs: string[] = [];
+    for (const [key, val] of formData.entries()) {
+      keyValuePairs.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(val))}`);
     }
+    const formDataString = keyValuePairs.join('&');
 
-    if (closeBtn && loginModal) {
-      closeBtn.onclick = () => {
-        loginModal.style.display = 'none';
-      };
-    }
-
-    const handleWindowClick = (event: MouseEvent) => {
-      if (loginModal && event.target === loginModal) {
-        loginModal.style.display = 'none';
-      }
-    };
-    window.addEventListener('click', handleWindowClick);
-
-    if (loginForm) {
-      loginForm.onsubmit = (event) => {
-        event.preventDefault();
-        const usernameInput = document.getElementById('username') as HTMLInputElement;
-        const passwordInput = document.getElementById('password') as HTMLInputElement;
-        const username = usernameInput?.value;
-        const password = passwordInput?.value;
-
-        if (username && password) {
-          alert(`Username: ${username}\nPassword: ${password}`);
-          if (loginModal) loginModal.style.display = 'none';
-        } else {
-          alert('Please fill in both fields.');
+    try {
+      await fetch(
+        'https://script.google.com/macros/s/AKfycbw7FKhJirsHSIJuw6MVhn0Mj1t3M1Q6UMcaz2iENm_fD1mFixSrMJf9u3qAs4TVXpJb/exec',
+        {
+          redirect: 'follow',
+          method: 'POST',
+          body: formDataString,
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8',
+          },
         }
-      };
+      );
+      setMessage({ text: 'Data submitted successfully!', bg: 'green', color: 'beige' });
+      form.reset();
+      setTimeout(() => setMessage(null), 3000);
+    } catch {
+      setMessage({ text: 'An error occurred while submitting the form.', bg: '#ffebee', color: '#c62828' });
+    } finally {
+      setIsSubmitting(false);
     }
-
-    // 2. Setup Google Apps Script Form Submission
-    const bookingForm = document.getElementById('form');
-    const messageBox = document.getElementById('message');
-    const submitButton = document.getElementById('submit-button') as HTMLButtonElement;
-
-    if (bookingForm) {
-      const handleBookingSubmit = function (e: Event) {
-        e.preventDefault();
-        if (messageBox) {
-          messageBox.textContent = 'Submitting..';
-          messageBox.style.display = 'block';
-          messageBox.style.backgroundColor = 'beige';
-          messageBox.style.color = 'green';
-        }
-        if (submitButton) submitButton.disabled = true;
-
-        const formData = new FormData(bookingForm as HTMLFormElement);
-        const keyValuePairs: string[] = [];
-        for (const [key, value] of formData.entries()) {
-          keyValuePairs.push(encodeURIComponent(key) + '=' + encodeURIComponent(value as string));
-        }
-        const formDataString = keyValuePairs.join('&');
-
-        fetch(
-          'https://script.google.com/macros/s/AKfycbw7FKhJirsHSIJuw6MVhn0Mj1t3M1Q6UMcaz2iENm_fD1mFixSrMJf9u3qAs4TVXpJb/exec',
-          {
-            redirect: 'follow',
-            method: 'POST',
-            body: formDataString,
-            headers: {
-              'Content-Type': 'text/plain;charset=utf-8',
-            },
-          }
-        )
-          .then((response) => {
-            if (response) {
-              if (messageBox) {
-                messageBox.textContent = 'Data submitted successfully!';
-                messageBox.style.display = 'block';
-                messageBox.style.backgroundColor = 'green';
-                messageBox.style.color = 'beige';
-              }
-              if (submitButton) submitButton.disabled = false;
-              (bookingForm as HTMLFormElement).reset();
-
-              setTimeout(() => {
-                if (messageBox) {
-                  messageBox.textContent = '';
-                  messageBox.style.display = 'none';
-                }
-              }, 2600);
-            } else {
-              throw new Error('Failed to submit the form.');
-            }
-          })
-          .catch((error) => {
-            console.error(error);
-            if (messageBox) {
-              messageBox.textContent = 'An error occurred while submitting the form.';
-              messageBox.style.display = 'block';
-              messageBox.style.backgroundColor = '#ffebee';
-              messageBox.style.color = '#c62828';
-            }
-            if (submitButton) submitButton.disabled = false;
-          });
-      };
-
-      bookingForm.addEventListener('submit', handleBookingSubmit);
-      return () => {
-        window.removeEventListener('click', handleWindowClick);
-        bookingForm.removeEventListener('submit', handleBookingSubmit);
-      };
-    }
-
-    return () => {
-      window.removeEventListener('click', handleWindowClick);
-    };
-  }, []);
+  };
 
   return (
-    <div className="blogspot-exact-root">
-      {/* Exact Inlined Styles from User Code */}
+    <div className="classic-blogspot-root">
       <style jsx global>{`
-        .blogspot-exact-root * {
+        .classic-blogspot-root {
+          font-family: Arial, Helvetica, sans-serif;
           margin: 0;
           padding: 0;
-          box-sizing: border-box;
-          font-family: Arial, Helvetica, sans-serif;
+          background-color: #fff;
+          color: #333;
         }
-
-        .blogspot-exact-root header {
+        .classic-blogspot-root header {
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -144,402 +63,288 @@ export default function ClassicBlogspotPage() {
           padding: 10px 20px;
           box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
-
-        .blogspot-exact-root .logo-container {
+        .classic-blogspot-root .logo-container {
           display: flex;
           align-items: center;
         }
-
-        .blogspot-exact-root .logo {
+        .classic-blogspot-root .logo {
           width: 80px;
           height: 80px;
           margin-right: 20px;
         }
-
-        .blogspot-exact-root .company-name {
-          font-size: 37px;
+        .classic-blogspot-root .company-name {
+          font-size: 32px;
           color: #008080;
           font-weight: bold;
         }
-
         @media (max-width: 768px) {
-          .blogspot-exact-root .company-name {
-            font-size: 22px;
+          .classic-blogspot-root .company-name {
+            font-size: 20px;
           }
-          .blogspot-exact-root .contact-number {
+          .classic-blogspot-root .contact-number {
             font-size: 18px !important;
           }
-          .blogspot-exact-root header {
+          .classic-blogspot-root header {
             flex-direction: column;
             gap: 10px;
           }
         }
-
-        .blogspot-exact-root .header-right {
+        .classic-blogspot-root .header-right {
           display: flex;
           align-items: center;
+          gap: 15px;
         }
-
-        .blogspot-exact-root .download-btn {
-          background-color: orange;
-          padding: 10px 20px;
-          color: blue;
+        .classic-blogspot-root .download-btn {
+          background-color: #ff9800;
+          padding: 8px 16px;
+          color: #fff;
           text-decoration: none;
           border-radius: 5px;
-          margin-right: 20px;
           font-weight: bold;
+          font-size: 14px;
         }
-
-        .blogspot-exact-root .contact-number {
-          font-size: 30px;
+        .classic-blogspot-root .portal-btn {
+          background-color: #008080;
+          padding: 8px 16px;
+          color: #fff;
+          text-decoration: none;
+          border-radius: 5px;
+          font-weight: bold;
+          font-size: 13px;
+        }
+        .classic-blogspot-root .contact-number {
+          font-size: 24px;
           color: #008080;
           font-weight: bold;
         }
-
-        .blogspot-exact-root .login-btn {
-          background-color: #008080;
-          color: white;
-          border: none;
-          cursor: pointer;
-          font-size: 16px;
-        }
-
-        .blogspot-exact-root .login-btn:hover {
-          background-color: #008080;
-        }
-
-        .blogspot-exact-root .modal {
-          display: none;
-          position: fixed;
-          z-index: 1000;
-          left: 0;
-          top: 0;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(0, 0, 0, 0.4);
-          justify-content: center;
-          align-items: center;
-        }
-
-        .blogspot-exact-root .modal-content {
-          background-color: white;
-          padding: 20px;
-          border-radius: 8px;
-          width: 300px;
-          text-align: center;
-          position: relative;
-        }
-
-        .blogspot-exact-root .modal-content input {
-          width: 100%;
-          padding: 10px;
-          margin: 10px 0;
-          border: 1px solid #ccc;
-          border-radius: 5px;
-        }
-
-        .blogspot-exact-root .modal-content button {
-          background-color: #333;
-          color: white;
-          padding: 10px 20px;
-          border: none;
-          cursor: pointer;
-          font-size: 16px;
-          border-radius: 5px;
-          width: 100%;
-        }
-
-        .blogspot-exact-root .modal-content button:hover {
-          background-color: #008080;
-        }
-
-        .blogspot-exact-root .close-btn {
-          position: absolute;
-          top: 10px;
-          right: 15px;
-          font-size: 24px;
-          font-weight: bold;
-          color: #333;
-          cursor: pointer;
-        }
-
-        .blogspot-exact-root .icons {
+        .classic-blogspot-root .icons {
           display: flex;
           justify-content: center;
           margin-top: 8px;
           background-color: #008080;
           padding: 8px;
+          flex-wrap: wrap;
         }
-
-        .blogspot-exact-root .icon {
-          padding: 10px;
-          margin: 0 20px;
-          border-radius: 10px;
+        .classic-blogspot-root .icon {
+          padding: 10px 20px;
+          margin: 0 10px;
+          border-radius: 6px;
           color: white;
-          font-size: 16px;
+          font-size: 15px;
           cursor: pointer;
           position: relative;
-          transition: background-color 0.4s ease;
+          text-decoration: none;
         }
-
-        .blogspot-exact-root .icon:hover {
+        .classic-blogspot-root .icon:hover {
           background-color: #005577;
         }
-
-        .blogspot-exact-root .icon:hover .dropdown {
-          display: block;
-        }
-
-        .blogspot-exact-root .dropdown {
-          display: none;
-          position: absolute;
-          top: 30px;
-          left: 50%;
-          transform: translateX(-50%);
-          background-color: white;
-          color: #333;
-          padding: 10px;
-          border: 1px solid #ddd;
-          width: 120px;
-          z-index: 10;
-        }
-
-        .blogspot-exact-root .dropdown a {
-          padding: 8px;
-          text-decoration: none;
-          color: #333;
-          display: block;
-        }
-
-        .blogspot-exact-root .dropdown a:hover {
-          background-color: #ddd;
-        }
-
-        .blogspot-exact-root .carousel-container {
+        .classic-blogspot-root .carousel-container {
           position: relative;
           width: 100%;
           min-height: 480px;
           overflow: hidden;
+          background: #222;
         }
-
-        .blogspot-exact-root .carousel-images {
+        .classic-blogspot-root .carousel-images {
           display: flex;
           width: 200%;
-          animation: carousel 50s infinite;
+          animation: classicCarousel 30s infinite;
         }
-
-        .blogspot-exact-root .carousel-images img {
+        .classic-blogspot-root .carousel-images img {
           width: 50%;
-          height: 90vh;
-          min-height: 480px;
+          height: 520px;
           object-fit: cover;
         }
-
-        @keyframes carousel {
+        @keyframes classicCarousel {
           0% { transform: translateX(0); }
+          45% { transform: translateX(0); }
           50% { transform: translateX(-50%); }
-          50.01% { transform: translateX(-50%); }
+          95% { transform: translateX(-50%); }
           100% { transform: translateX(0); }
         }
-
-        .blogspot-exact-root .enquiry-form-container {
+        .classic-blogspot-root .enquiry-form-container {
           position: absolute;
-          top: 45%;
-          left: 70%;
-          transform: translate(-50%, -50%);
-          background-color: rgba(0, 0, 0, 0.5);
-          padding: 30px;
-          border-radius: 5px;
-          color: White;
-          width: 80%;
+          top: 50%;
+          right: 8%;
+          transform: translateY(-50%);
+          background-color: rgba(0, 0, 0, 0.75);
+          padding: 24px;
+          border-radius: 8px;
+          color: white;
+          width: 90%;
           max-width: 320px;
-          z-index: 20;
+          z-index: 10;
         }
-
         @media (max-width: 900px) {
-          .blogspot-exact-root .enquiry-form-container {
+          .classic-blogspot-root .enquiry-form-container {
             position: relative;
             top: auto;
-            left: auto;
+            right: auto;
             transform: none;
-            margin: -40px auto 30px;
-            background-color: rgba(0, 128, 128, 0.95);
-          }
-          .blogspot-exact-root .carousel-images img {
-            height: 50vh;
-            min-height: 320px;
+            margin: -60px auto 40px;
+            background: rgba(0, 80, 80, 0.95);
           }
         }
-
-        .blogspot-exact-root .enquiry-form-container h2 {
+        .classic-blogspot-root .enquiry-form-container h2 {
           text-align: center;
-          margin-bottom: 20px;
-          color: White;
+          margin-bottom: 15px;
+          font-size: 22px;
+          color: white;
+          font-weight: bold;
         }
-
-        .blogspot-exact-root .enquiry-form-container input,
-        .blogspot-exact-root .enquiry-form-container select,
-        .blogspot-exact-root .enquiry-form-container textarea,
-        .blogspot-exact-root .enquiry-form-container button {
+        .classic-blogspot-root .enquiry-form-container input,
+        .classic-blogspot-root .enquiry-form-container select,
+        .classic-blogspot-root .enquiry-form-container textarea,
+        .classic-blogspot-root .enquiry-form-container button {
           width: 100%;
           padding: 10px;
-          margin-bottom: 15px;
-          border: none;
-          border-radius: 5px;
-          font-size: 1rem;
+          margin-bottom: 12px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          font-size: 14px;
         }
-
-        .blogspot-exact-root .enquiry-form-container input,
-        .blogspot-exact-root .enquiry-form-container select,
-        .blogspot-exact-root .enquiry-form-container textarea {
-          background-color: #fff;
-          color: #333;
-        }
-
-        .blogspot-exact-root .enquiry-form-container button {
+        .classic-blogspot-root .enquiry-form-container button {
           background-color: #ff8c00;
           color: white;
           cursor: pointer;
           font-weight: bold;
+          border: none;
         }
-
-        .blogspot-exact-root .enquiry-form-container button:hover {
+        .classic-blogspot-root .enquiry-form-container button:hover {
           background-color: #e07b00;
         }
-
-        .blogspot-exact-root .testimonials {
+        .classic-blogspot-root .chart-title {
+          text-align: center;
+          margin: 50px 20px 20px;
+        }
+        .classic-blogspot-root .chart-title h1 {
+          font-size: 32px;
+          color: #008080;
+          margin-bottom: 8px;
+        }
+        .classic-blogspot-root .chart-title p {
+          color: #666;
+          font-size: 16px;
+        }
+        .classic-blogspot-root .testimonials {
           display: flex;
           flex-wrap: wrap;
-          gap: 20px;
-          margin-top: 40px;
+          gap: 25px;
+          padding: 20px;
           justify-content: center;
-          padding: 0 20px;
+          max-width: 1200px;
+          margin: 0 auto;
         }
-
-        .blogspot-exact-root .testimonial {
+        .classic-blogspot-root .testimonial {
           background-color: #f9f9f9;
           padding: 20px;
           width: 260px;
-          text-align: justify;
-          border-radius: 5px;
+          text-align: center;
+          border-radius: 8px;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-
-        .blogspot-exact-root .testimonial img {
-          width: 200px;
-          height: 200px;
+        .classic-blogspot-root .testimonial img {
+          width: 150px;
+          height: 150px;
           border-radius: 50%;
           margin: 0 auto 15px;
-          display: block;
           object-fit: cover;
+          display: block;
         }
-
-        .blogspot-exact-root .testimonial p {
+        .classic-blogspot-root .testimonial p {
           font-style: italic;
           color: #008080;
           font-size: 13px;
-          line-height: 1.5;
+          line-height: 1.6;
+          text-align: justify;
         }
-
-        .blogspot-exact-root .whatsapp-btn {
-          position: fixed;
-          bottom: 20px;
-          right: 20px;
-          background-color: #25d366;
-          color: white;
-          padding: 15px 20px;
-          font-size: 18px;
-          border-radius: 50px;
-          display: flex;
-          align-items: center;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-          text-decoration: none;
-          z-index: 800;
-        }
-
-        .blogspot-exact-root .whatsapp-btn img {
-          width: 30px;
-          height: 30px;
-          margin-right: 10px;
-        }
-
-        .blogspot-exact-root .whatsapp-btn:hover {
-          background-color: #128C7E;
-          transition: background-color 0.3s;
-        }
-
-        .blogspot-exact-root footer {
-          display: flex;
-          justify-content: space-around;
-          padding: 30px 20px;
-          background-color: #008080;
-          color: white;
-          flex-wrap: wrap;
-          margin-top: 40px;
-        }
-
-        .blogspot-exact-root .footer-services ul {
-          list-style: none;
-          margin-top: 10px;
-        }
-
-        .blogspot-exact-root .footer-services ul li {
-          margin: 8px 0;
-          font-size: 13px;
-        }
-
-        .blogspot-exact-root .footer-copy {
-          align-self: flex-end;
-          text-align: center;
-          margin-top: 20px;
-          width: 100%;
-          font-size: 12px;
-          border-top: 1px solid rgba(255, 255, 255, 0.2);
-          padding-top: 15px;
-        }
-
-        .blogspot-exact-root .org-chart {
+        .classic-blogspot-root .org-chart {
           display: flex;
           justify-content: center;
-          gap: 25px;
-          align-items: center;
-          margin: 40px auto;
+          gap: 30px;
           flex-wrap: wrap;
+          margin: 30px auto 60px;
+          max-width: 1000px;
           padding: 0 20px;
         }
-
-        .blogspot-exact-root .org-member {
+        .classic-blogspot-root .org-member {
           background-color: white;
           border-radius: 8px;
           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-          width: 250px;
+          width: 260px;
           text-align: center;
-          padding: 20px;
-          transition: transform 0.3s ease;
+          padding: 25px 20px;
+          border-top: 4px solid #008080;
         }
-
-        .blogspot-exact-root .org-member:hover {
-          transform: scale(1.05);
-        }
-
-        .blogspot-exact-root .org-member img {
-          width: 100px;
-          height: 100px;
+        .classic-blogspot-root .org-member img {
+          width: 110px;
+          height: 110px;
           border-radius: 50%;
-          margin-bottom: 15px;
+          margin: 0 auto 15px;
           object-fit: cover;
+          display: block;
         }
-
-        .blogspot-exact-root .org-member p {
+        .classic-blogspot-root .org-member h3 {
+          font-size: 18px;
+          color: #333;
+          margin-bottom: 5px;
+        }
+        .classic-blogspot-root .org-member p {
           font-size: 13px;
-          color: #555;
-          margin-top: 4px;
+          color: #666;
+          margin: 4px 0;
         }
-
-        .blogspot-exact-root .chart-title {
+        .classic-blogspot-root footer {
+          display: flex;
+          justify-content: space-around;
+          padding: 40px 20px 20px;
+          background-color: #008080;
+          color: white;
+          flex-wrap: wrap;
+          gap: 30px;
+        }
+        .classic-blogspot-root .footer-services {
+          min-width: 180px;
+        }
+        .classic-blogspot-root .footer-services h3 {
+          font-size: 16px;
+          margin-bottom: 15px;
+          border-bottom: 2px solid rgba(255,255,255,0.3);
+          padding-bottom: 5px;
+        }
+        .classic-blogspot-root .footer-services ul {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+        .classic-blogspot-root .footer-services ul li {
+          margin: 8px 0;
+          font-size: 13px;
+        }
+        .classic-blogspot-root .footer-copy {
           text-align: center;
-          font-size: 28px;
-          color: #008080;
-          margin: 40px 0 20px;
+          margin-top: 30px;
+          width: 100%;
+          font-size: 12px;
+          border-top: 1px solid rgba(255,255,255,0.2);
+          padding-top: 15px;
+        }
+        .classic-blogspot-root .whatsapp-btn {
+          position: fixed;
+          bottom: 25px;
+          right: 25px;
+          background-color: #25d366;
+          color: white;
+          padding: 12px 20px;
+          font-size: 16px;
+          font-weight: bold;
+          border-radius: 50px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+          text-decoration: none;
+          z-index: 999;
         }
       `}</style>
 
@@ -547,102 +352,85 @@ export default function ClassicBlogspotPage() {
       <header>
         <div className="logo-container">
           <img
-            src="https://lh3.googleusercontent.com/J182IL7UFYLEkNSPgfiI2CrC13URd4BpFHZL2r8xv2A42XWYCr_-BYiXm1sY-9ooHetGlawx9_DTiEIQew=s265-w265-h265"
             alt="Company Logo"
             className="logo"
+            src="https://lh3.googleusercontent.com/J182IL7UFYLEkNSPgfiI2CrC13URd4BpFHZL2r8xv2A42XWYCr_-BYiXm1sY-9ooHetGlawx9_DTiEIQew=s265-w265-h265-rw"
           />
           <span className="company-name">Neetha Nursing Service at Home</span>
         </div>
         <div className="header-right">
-          <a href="tel:+919397925412" className="download-btn">93 979 254 12</a>
-          <span> &#128222; </span>
-          <span className="contact-number"> 93 979 254 12 </span>
+          <a className="download-btn" href="tel:+919397925412">
+            📞 93 979 254 12
+          </a>
+          <span className="contact-number">83 410 696 93</span>
+          <a
+            href="https://n.neethanursing.in"
+            className="portal-btn"
+            title="Access the new online booking and care portal"
+          >
+            Go to Modern Portal ➔
+          </a>
         </div>
       </header>
 
-      {/* Icon Section */}
-      <section className="icons">
-        <div className="icon">
-          Home
-          <div className="dropdown">
-            <a href="#services">Services</a>
-            <a href="#team">Our Team</a>
-            <a href="https://n.neethanursing.in">Modern Portal</a>
-          </div>
-        </div>
-        <div className="icon">
-          About
-          <div className="dropdown">
-            <a href="#team">Our Team</a>
-            <a href="https://n.neethanursing.in/about">Full Story</a>
-          </div>
-        </div>
-        <div className="icon">
-          Services
-          <div className="dropdown">
-            <a href="#services">Home Services</a>
-            <a href="https://n.neethanursing.in/services">All Packages</a>
-          </div>
-        </div>
-        <div className="icon">
-          <button className="login-btn" id="loginBtn">Admin</button>
-        </div>
-      </section>
+      {/* Navigation Bar */}
+      <nav className="icons">
+        <a href="#services" className="icon">Services</a>
+        <a href="#about" className="icon">About</a>
+        <a href="#team" className="icon">Our Team</a>
+        <a href="#book" className="icon">Book Now</a>
+        <button
+          className="icon"
+          style={{ background: 'transparent', border: 'none' }}
+          onClick={() => setModalOpen(true)}
+        >
+          Admin Login
+        </button>
+        <a
+          href="https://n.neethanursing.in/employee/login"
+          className="icon"
+          style={{ backgroundColor: '#ff8c00', fontWeight: 'bold' }}
+        >
+          Caregiver Portal
+        </a>
+      </nav>
 
-      {/* Carousel Section */}
-      <div className="carousel-container">
+      {/* Hero Carousel & Floating Booking Form */}
+      <div className="carousel-container" id="book">
         <div className="carousel-images">
           <img
-            src="https://lh3.googleusercontent.com/pbd3_a33HXaniCU_iNS5pi5Vap5hc9r4DUQ1C1k0mZf8R-2itbglokusVm3A8p2j8Pk7DkVZrQgW8qX5VQ=s265-w265-h265"
-            alt="Image 1"
+            alt="Neetha Nursing Care"
+            src="https://lh3.googleusercontent.com/pbd3_a33HXaniCU_iNS5pi5Vap5hc9r4DUQ1C1k0mZf8R-2itbglokusVm3A8p2j8Pk7DkVZrQgW8qX5VQ=s265-w265-h265-rw"
           />
           <img
-            src="https://lh3.googleusercontent.com/NJTeELVUwXP4chHqK3RMuJZcFogavFy2a-c9pg2vBWDS-6UIx_CR_eYzFoYt8--iCeJ9FQCPFS7_0LK_vg=s265-w265-h265"
-            alt="Image 2"
-          />
-          <img
-            src="https://lh3.googleusercontent.com/_ij54-AorD3WxXzEZIG6xtXmG84j5yvRq5En_8ulYLzTd5Xsq_ZywmzEsronx9SPYkBNl8MQ3x9tc9I7hQ=s265-w265-h265"
-            alt="Image 3"
-          />
-          <img
-            src="https://lh3.googleusercontent.com/YBjw1meMuoJQo1xEvpRKgzJl2HFBU5Whn-pq5eEQiSQe62QSZZA59mFEHQFXE0ZGZGyFmt_eCs5SRsYesQ=s265-w265-h265"
-            alt="Image 4"
+            alt="Patient Care at Home"
+            src="https://lh3.googleusercontent.com/NJTeELVUwXP4chHqK3RMuJZcFogavFy2a-c9pg2vBWDS-6UIx_CR_eYzFoYt8--iCeJ9FQCPFS7_0LK_vg=s265-w265-h265-rw"
           />
         </div>
-      </div>
 
-      {/* Enquiry Form Section */}
-      <div className="enquiry-form-container">
-        <h2 style={{ fontSize: '150%' }}>Book Now</h2>
-        <form id="form" className="container m-4 pl-4" method="POST">
-          <div className="field">
-            <div className="control">
+        {/* Enquiry Form */}
+        <div className="enquiry-form-container">
+          <h2>Book Now</h2>
+          <form id="form" onSubmit={handleFormSubmit}>
+            <div>
               <input
-                className="input"
                 type="text"
                 placeholder="Your Name"
                 name="Your Name"
                 required
               />
             </div>
-          </div>
-
-          <div className="field">
-            <div className="control">
+            <div>
               <input
-                className="input"
-                type="text"
+                type="tel"
                 placeholder="Phone Number"
                 name="Phone Number"
                 required
               />
             </div>
-          </div>
-
-          <div className="field">
-            <div className="control">
-              <select defaultValue="getone" required>
-                <option value="getone" disabled>Select a Service</option>
+            <div>
+              <select name="service_choice" defaultValue="" required>
+                <option value="" disabled>Select a Service</option>
                 <option value="IM">IM Injections 299</option>
                 <option value="IV">IV Injections 399</option>
                 <option value="wound">Wound Dressing 399</option>
@@ -650,257 +438,300 @@ export default function ClassicBlogspotPage() {
                 <option value="Nurse">Nurse 24/7 2999</option>
               </select>
             </div>
-          </div>
-
-          <div className="field">
-            <div className="control">
+            <div>
               <input
-                className="input"
                 type="text"
-                placeholder="service"
+                placeholder="Service or Locality Details"
                 name="service"
               />
             </div>
-          </div>
-
-          <div className="field">
-            <div className="control">
-              <input
-                className="input"
-                type="text"
-                placeholder="Message"
+            <div>
+              <textarea
+                rows={2}
+                placeholder="Message or specific patient conditions"
                 name="Message"
               />
             </div>
-          </div>
-
-          <div className="field is-grouped">
-            <div className="control">
-              <button className="button is-primary" type="submit" id="submit-button">
-                submit
+            <div>
+              <button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Submitting...' : 'Submit Request'}
               </button>
             </div>
-          </div>
-        </form>
-        <div
-          id="message"
-          style={{
-            display: 'none',
-            margin: '20px',
-            fontWeight: 'bold',
-            color: 'green',
-            padding: '8px',
-            backgroundColor: 'beige',
-            borderRadius: '4px',
-            borderColor: 'aquamarine',
-          }}
-        ></div>
-      </div>
+          </form>
 
-      {/* WhatsApp Button */}
-      <a href="https://wa.me/+918341069693" className="whatsapp-btn" target="_blank" rel="noopener noreferrer">
-        <img
-          src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
-          alt="WhatsApp Logo"
-        />
-        Chat Us Now
-      </a>
+          {message && (
+            <div
+              style={{
+                margin: '10px 0',
+                padding: '8px',
+                borderRadius: '4px',
+                backgroundColor: message.bg,
+                color: message.color,
+                fontWeight: 'bold',
+                textAlign: 'center',
+                fontSize: '12px',
+              }}
+            >
+              {message.text}
+            </div>
+          )}
+
+          <div style={{ textAlign: 'center', marginTop: '10px', fontSize: '11px' }}>
+            Looking for instant UPI confirmation?{' '}
+            <a
+              href="https://n.neethanursing.in/booking"
+              style={{ color: '#ffb74d', textDecoration: 'underline', fontWeight: 'bold' }}
+            >
+              Book via Modern Portal
+            </a>
+          </div>
+        </div>
+      </div>
 
       {/* Services Section */}
       <div className="chart-title" id="services">
         <h1>Our Services</h1>
-        <p style={{ fontSize: '15px', color: '#666' }}>All These Services are at Your Home</p>
+        <p>All These Services are Provided at Your Home</p>
       </div>
+
       <section className="testimonials">
         <div className="testimonial">
           <img
-            src="https://lh3.googleusercontent.com/Saib3HojfInq_W_swi4SgDtOCLxmGH4mI3kG5OK5bzuVAv2vvuTVI5vV_9coVqBsRZv4ziea_84pUmoC2A=s265-w265-h265"
-            alt="Testimonial 1"
+            alt="Injection Service"
+            src="https://lh3.googleusercontent.com/Saib3HojfInq_W_swi4SgDtOCLxmGH4mI3kG5OK5bzuVAv2vvuTVI5vV_9coVqBsRZv4ziea_84pUmoC2A=s265-w265-h265-rw"
           />
           <p>
-            Looking for professional, safe, and affordable injections service at home just Rs299 ? Our certified and experienced nurse injectors are here to provide high-quality care and deliver exceptional results. Whether you need iv or im other injectable treatments, our nurse-led services ensure you receive the best possible care.
+            Looking for professional, safe, and affordable injections service at home just Rs299? Our certified and experienced nurse injectors are here to provide high-quality care and deliver exceptional results.
           </p>
         </div>
 
         <div className="testimonial">
           <img
-            src="https://lh3.googleusercontent.com/wNLkSKxk2Cmwl8Lx5vFWSPaawr6kZ1xH8CIp8I6sZePORd5cwGbRtp-T6ZPsmpidrQg8F9SAIOmHGdC0kA=s265-w265-h265"
-            alt="Testimonial 2"
+            alt="Wound Dressing Service"
+            src="https://lh3.googleusercontent.com/wNLkSKxk2Cmwl8Lx5vFWSPaawr6kZ1xH8CIp8I6sZePORd5cwGbRtp-T6ZPsmpidrQg8F9SAIOmHGdC0kA=s265-w265-h265-rw"
           />
           <p>
-            Looking for expert wound dressing and surgical dressing services? Our team of licensed and skilled nurses specializes in the care and management of wounds, ensuring you receive top-quality, safe, and effective treatment. Whether recovering from surgery, managing chronic wounds, or needing post-procedural care, our nurse-led services are here to support your healing journey.
+            Looking for expert wound dressing and surgical dressing services? Our team of licensed and skilled nurses specializes in the care and management of wounds, ensuring you receive top-quality, safe, and effective treatment.
           </p>
         </div>
 
         <div className="testimonial">
           <img
-            src="https://lh3.googleusercontent.com/lWxxfDMTHcRb4KNU0X1wpyh4EgTrtKs2BV1CXTACQM3fXu1Kz-YrNXuYNHcPK2pHp-6Soiqp9WFJu2BsjA=s265-w265-h265"
-            alt="Testimonial 3"
+            alt="Catheterization Service"
+            src="https://lh3.googleusercontent.com/lWxxfDMTHcRb4KNU0X1wpyh4EgTrtKs2BV1CXTACQM3fXu1Kz-YrNXuYNHcPK2pHp-6Soiqp9WFJu2BsjA=s265-w265-h265-rw"
           />
           <p>
-            Looking for reliable, professional urine pipe change and catheterization services? Our team of certified and skilled nurses specializes in providing safe and efficient urinary catheterization and urine pipe change services. Whether you need temporary or long-term catheter care, we offer tailored solutions to ensure comfort, safety, and hygiene.
+            Looking for reliable, professional urine pipe change and catheterization services? Our team of certified and skilled nurses specializes in providing safe and efficient urinary catheterization and urine pipe change services.
           </p>
         </div>
 
         <div className="testimonial">
           <img
-            src="https://lh3.googleusercontent.com/nTa4Ms1E96zUzea9tvlanivCwyhnukUToxNrBV4GpEYNxml0AKAj6wNK1cbyfXE8O4lsTXPAGcBspU86gw=s265-w265-h265"
-            alt="Testimonial 4"
+            alt="IV Infusion Therapy"
+            src="https://lh3.googleusercontent.com/nTa4Ms1E96zUzea9tvlanivCwyhnukUToxNrBV4GpEYNxml0AKAj6wNK1cbyfXE8O4lsTXPAGcBspU86gw=s265-w265-h265-rw"
           />
           <p>
-            Looking for reliable IV infusion therapy and saline drips at the comfort of your home? Our home-based IV hydration service brings personalized treatment directly to your doorstep. Whether you need a boost in energy, hydration, or recovery after illness, we offer a range of IV infusion treatments, including saline hydration, vitamin C infusions, and electrolyte balance solutions tailored to your needs.
+            Looking for reliable IV infusion therapy and saline drips at the comfort of your home? Our home-based IV hydration service brings personalized treatment directly to your doorstep.
           </p>
         </div>
 
         <div className="testimonial">
           <img
-            src="https://lh3.googleusercontent.com/_ij54-AorD3WxXzEZIG6xtXmG84j5yvRq5En_8ulYLzTd5Xsq_ZywmzEsronx9SPYkBNl8MQ3x9tc9I7hQ=s265-w265-h265"
-            alt="Testimonial 5"
+            alt="At-Home IVF Support"
+            src="https://lh3.googleusercontent.com/_ij54-AorD3WxXzEZIG6xtXmG84j5yvRq5En_8ulYLzTd5Xsq_ZywmzEsronx9SPYkBNl8MQ3x9tc9I7hQ=s265-w265-h265-rw"
           />
           <p>
-            Looking for professional IVF injection services at the comfort of your home? Our at-home IVF injection service offers a safe, convenient, and private option for patients undergoing in vitro fertilization (IVF) treatment. Whether you're starting your IVF journey or need ongoing injection support, our team of experienced nurses provides personalized, in-home care with the utmost precision and comfort.
+            Looking for professional IVF injection services at the comfort of your home? Our at-home IVF injection service offers a safe, convenient, and private option for patients undergoing in vitro fertilization treatment.
           </p>
         </div>
 
         <div className="testimonial">
           <img
-            src="https://lh3.googleusercontent.com/P1XTJjtK_XpUx8j5cL_GTWBPzX4bgI3gD7WnuVQ8llntPKzmpeUv_YJeKTEwSOnDUgFcPv2UtV8J80xrsA=s265-w265-h265"
-            alt="Testimonial 6"
+            alt="Post-Surgical Care"
+            src="https://lh3.googleusercontent.com/xaKGRde8fPuAy5IPGKFLTLXjEFy4lkilQgjxlJXPxGQ0Dih594Ln4XnHwZLgqHfRO0yFTNOdnrV8k67Oaw=s265-w265-h265-rw"
           />
           <p>
-            IV Injection Service at your home, Our experienced Nurse come to your home and do medication there Get safe, reliable, and convenient IM (Intramuscular) and IV (Intravenous) injections at the comfort of your home. Our licensed nurses are available to administer injections for various health needs, including medication delivery, vitamin therapies, hydration treatments, and more. We ensure a professional, hygienic, and comfortable experience. Schedule your appointment today for personalized, in-home care!
-          </p>
-        </div>
-
-        <div className="testimonial">
-          <img
-            src="https://lh3.googleusercontent.com/Ae6nfA51rnMfaWiuZw0lfwlxG_n8MUOViG7APoMD1eflCpFQ_9NWyTEe2GIyPYV62f1JJqVQl8EBprJHeQ=s265-w265-h265"
-            alt="Testimonial 7"
-          />
-          <p>
-            IM Injection Service at your home, Get safe, reliable, and convenient IM (Intramuscular) and IV (Intravenous) injections at the comfort of your home. Our licensed nurses are available to administer injections for various health needs, including medication delivery, vitamin therapies, hydration treatments, and more. We ensure a professional, hygienic, and comfortable experience. Schedule your appointment today for personalized, in-home care!
-          </p>
-        </div>
-
-        <div className="testimonial">
-          <img
-            src="https://lh3.googleusercontent.com/xaKGRde8fPuAy5IPGKFLTLXjEFy4lkilQgjxlJXPxGQ0Dih594Ln4XnHwZLgqHfRO0yFTNOdnrV8k67Oaw=s265-w265-h265"
-            alt="Testimonial 8"
-          />
-          <p>
-            After surgery, receiving the right nursing care is essential to ensure a smooth and safe recovery. Our post-surgical nursing care services provide professional, compassionate care tailored to your unique needs. Our experienced nurses are trained to monitor your progress, manage post-operative symptoms, and assist with your recovery plan, so you can focus on healing.
-            We offer a wide range of services designed to promote recovery, prevent complications, and improve your overall well-being after surgery. From wound care and pain management to medication administration and mobility assistance, our nurses are here to support you every step of the way.
+            After surgery, receiving the right nursing care is essential to ensure a smooth and safe recovery. Our post-surgical nursing care services provide professional, compassionate care tailored to your unique needs.
           </p>
         </div>
       </section>
 
-      {/* Org Chart / Team */}
+      {/* Team Section */}
       <div className="chart-title" id="team">
         <h1>Our Team</h1>
-        <p style={{ fontSize: '15px', color: '#666' }}>Meet the key members of our organization</p>
+        <p>Meet the Key Members of Our Organization</p>
       </div>
 
       <section className="org-chart">
         <div className="org-member">
           <img
-            src="https://lh3.googleusercontent.com/NYx_F19A6LPXclmwfhhoIoxMuiR4qN4qS9eSTW_UXitdG9RZo2tlKPBLqTVsMG7yEpYbba-eLz4yrj8ZlQ=s265-w265-h265"
-            alt="Team Member 1"
+            alt="Sunitha Yelamarthi"
+            src="https://lh3.googleusercontent.com/NYx_F19A6LPXclmwfhhoIoxMuiR4qN4qS9eSTW_UXitdG9RZo2tlKPBLqTVsMG7yEpYbba-eLz4yrj8ZlQ=s265-w265-h265-rw"
           />
-          <p style={{ fontWeight: 'bold', color: '#333', fontSize: '16px' }}>Sunitha Yelamarthi</p>
+          <h3>Sunitha Yelamarthi</h3>
           <p style={{ color: '#008080', fontWeight: 'bold' }}>CEO - Chief Executive Officer</p>
-          <p>16+ Years Of Experience</p>
+          <p>16+ Years of Clinical Experience</p>
         </div>
 
         <div className="org-member">
           <img
-            src="https://lh3.googleusercontent.com/WS5ec-h2gbrxkhYDVVykMtdj8Yd3Bxg6JnfkyP0WElnwlUTSCA97kiwS0CmwdAV9MNlmVoYzUpHYqGcFOA=s265-w265-h265"
-            alt="Team Member 2"
+            alt="Mareswara Rao"
+            src="https://lh3.googleusercontent.com/WS5ec-h2gbrxkhYDVVykMtdj8Yd3Bxg6JnfkyP0WElnwlUTSCA97kiwS0CmwdAV9MNlmVoYzUpHYqGcFOA=s265-w265-h265-rw"
           />
-          <p style={{ fontWeight: 'bold', color: '#333', fontSize: '16px' }}>Mareswara Rao</p>
+          <h3>Mareswara Rao</h3>
           <p style={{ color: '#008080', fontWeight: 'bold' }}>CTO - Chief Technology Officer</p>
-          <p>Experienced</p>
+          <p>Technical & Operations Lead</p>
         </div>
 
         <div className="org-member">
           <img
-            src="https://lh3.googleusercontent.com/oDUKUl6NEyfOqOZuES2eGISF0S4YzSPVYZ9zgVjE_SeWam0Pf9DcUiCqzgcFWEQ7SXDE88RavHKOqiE1LQ=s265-w265-h265"
-            alt="Team Member 3"
+            alt="Prabhakar Rao"
+            src="https://lh3.googleusercontent.com/oDUKUl6NEyfOqOZuES2eGISF0S4YzSPVYZ9zgVjE_SeWam0Pf9DcUiCqzgcFWEQ7SXDE88RavHKOqiE1LQ=s265-w265-h265-rw"
           />
-          <p style={{ fontWeight: 'bold', color: '#333', fontSize: '16px' }}>Prabhakar Rao</p>
+          <h3>Prabhakar Rao</h3>
           <p style={{ color: '#008080', fontWeight: 'bold' }}>COO - Chief Operating Officer</p>
-          <p>25+ Years Of Experience</p>
+          <p>25+ Years of Healthcare Operations</p>
         </div>
       </section>
 
       {/* Footer Section */}
-      <footer>
+      <footer id="about">
         <div className="footer-services">
           <h3>Services</h3>
           <ul>
-            <li>Injections</li>
-            <li>Vaccination</li>
-            <li>Post-surgical care</li>
-            <li>Wound dressing</li>
-            <li>Urinary catheterization</li>
-            <li>IV infusion and Injections</li>
+            <li>Injections (IM/IV)</li>
+            <li>Vaccination & Saline</li>
+            <li>Post-Surgical Care</li>
+            <li>Wound & Ulcer Dressing</li>
+            <li>Urinary Catheterization</li>
+            <li>IV Infusion Therapy</li>
           </ul>
         </div>
 
         <div className="footer-services">
           <h3>Why Us</h3>
           <ul>
-            <li>Experienced Staff</li>
-            <li>Refund policy</li>
-            <li>Benifits</li>
-            <li>Happy Customers</li>
+            <li>Experienced Certified Staff</li>
+            <li>Strict Hygiene Protocol</li>
+            <li>Doorstep Service in 30-45 Mins</li>
+            <li>Thousands of Happy Families</li>
           </ul>
         </div>
 
         <div className="footer-services">
-          <h3>About Us</h3>
+          <h3>Operating Areas</h3>
           <ul>
-            <li>Vision</li>
-            <li>Our Pillers</li>
-            <li>Privacy Policy</li>
-            <li>Terms and Conditions</li>
+            <li>Lingampally & BHEL</li>
+            <li>Gachibowli & Kondapur</li>
+            <li>Miyapur & Chandanagar</li>
+            <li>Madhapur & Hitec City</li>
           </ul>
         </div>
 
         <div className="footer-services">
           <h3>Contact Us</h3>
           <ul>
-            <li>maresh436@gmail.com</li>
-            <li>Technical Officer</li>
-            <li>Neetha Nursing</li>
-            <li>Hyderabad</li>
+            <li>Phone: +91 8341069693</li>
+            <li>Phone: +91 9397925412</li>
+            <li>Email: maresh436@gmail.com</li>
+            <li>Hyderabad, Telangana</li>
           </ul>
         </div>
 
         <div className="footer-copy">
-          <p>&copy; 2025 Neetha Nursing Service at home. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Neetha Nursing Service at Home. All rights reserved.</p>
         </div>
       </footer>
 
-      {/* Modal Dialog Box */}
-      <div className="modal" id="loginModal">
-        <div className="modal-content">
-          <span className="close-btn" id="closeBtn">&times;</span>
-          <h2 style={{ marginBottom: '15px', color: '#008080' }}>Login</h2>
-          <form id="loginForm">
-            <input type="text" id="username" placeholder="Username" required />
-            <input type="password" id="password" placeholder="Password" required />
-            <button type="submit">Submit</button>
-          </form>
-          <div style={{ marginTop: '15px', borderTop: '1px solid #eee', paddingTop: '10px' }}>
-            <a
-              href="https://n.neethanursing.in/admin/login"
-              style={{ fontSize: '12px', color: '#008080', textDecoration: 'underline' }}
-            >
-              Go to Modern Admin Portal ➔
-            </a>
+      {/* Floating WhatsApp Action */}
+      <a className="whatsapp-btn" href="https://wa.me/+918341069693" target="_blank" rel="noopener noreferrer">
+        <img
+          alt="WhatsApp"
+          src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+          style={{ width: '24px', height: '24px' }}
+        />
+        Chat on WhatsApp
+      </a>
+
+      {/* Simple Login Dialog */}
+      {modalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={() => setModalOpen(false)}
+        >
+          <div
+            style={{
+              backgroundColor: 'white',
+              padding: '30px',
+              borderRadius: '8px',
+              width: '90%',
+              maxWidth: '320px',
+              textAlign: 'center',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ marginBottom: '15px', color: '#008080' }}>Staff & Admin Access</h3>
+            <p style={{ fontSize: '12px', color: '#666', marginBottom: '20px' }}>
+              Access the centralized coordination and caregiver marketplace.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <a
+                href="https://n.neethanursing.in/admin/login"
+                style={{
+                  backgroundColor: '#008080',
+                  color: 'white',
+                  padding: '10px',
+                  borderRadius: '4px',
+                  textDecoration: 'none',
+                  fontWeight: 'bold',
+                  fontSize: '13px',
+                }}
+              >
+                Go to Admin Portal ➔
+              </a>
+              <a
+                href="https://n.neethanursing.in/employee/login"
+                style={{
+                  backgroundColor: '#333',
+                  color: 'white',
+                  padding: '10px',
+                  borderRadius: '4px',
+                  textDecoration: 'none',
+                  fontWeight: 'bold',
+                  fontSize: '13px',
+                }}
+              >
+                Go to Staff Login ➔
+              </a>
+              <button
+                type="button"
+                onClick={() => setModalOpen(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#999',
+                  cursor: 'pointer',
+                  marginTop: '10px',
+                  fontSize: '12px',
+                }}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
