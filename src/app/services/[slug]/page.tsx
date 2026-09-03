@@ -1,7 +1,11 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import HeaderNavbar from '@/components/navigation/HeaderNavbar';
+import FaqSection from '@/components/seo/FaqSection';
+import { ShieldCheck, CheckCircle2, Clock, PhoneCall, ArrowRight, Sparkles } from 'lucide-react';
 
 interface ServicePageProps {
   params: Promise<{ slug: string }>;
@@ -18,7 +22,60 @@ const FALLBACK_SERVICES = [
   { id: 'fallback-8', name: 'Physiotherapy & Rehabilitation', slug: 'physiotherapy-rehab', basePrice: 800.0, priceUnit: 'visit', description: 'Home-based physical therapy exercises for stroke recovery, joint replacement, or mobility issues.', minimumDays: 1 },
 ];
 
-export const revalidate = 0;
+export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  try {
+    const services = await prisma.service.findMany({
+      where: { isActive: true },
+      select: { slug: true },
+    });
+    if (services.length > 0) return services.map((s) => ({ slug: s.slug }));
+  } catch {}
+
+  return FALLBACK_SERVICES.map((s) => ({ slug: s.slug }));
+}
+
+export async function generateMetadata({ params }: ServicePageProps): Promise<Metadata> {
+  const { slug } = await params;
+  let service = null;
+  try {
+    service = await prisma.service.findUnique({ where: { slug } });
+  } catch {}
+  if (!service) {
+    service = FALLBACK_SERVICES.find((s) => s.slug === slug) || null;
+  }
+
+  if (!service) {
+    return {
+      title: 'Service Not Found | Neetha Nursing Service',
+    };
+  }
+
+  const title = `${service.name} at Home in Hyderabad | Neetha Nursing Service`;
+  const description = `${service.description} Doorstep certified GNM/BSc nurses available 24/7 across Hyderabad. Starting at ₹${Number(service.basePrice)} per ${service.priceUnit}. Call 8341069693.`;
+
+  return {
+    title,
+    description,
+    keywords: [
+      service.name,
+      `${service.name} at home Hyderabad`,
+      `${service.name} nurse near me`,
+      'home nursing service Hyderabad',
+      'certified bedside nurse Hyderabad',
+    ],
+    alternates: {
+      canonical: `https://neethanursing.in/services/${service.slug}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `https://neethanursing.in/services/${service.slug}`,
+      type: 'website',
+    },
+  };
+}
 
 export default async function ServiceDetailPage({ params }: ServicePageProps) {
   const { slug } = await params;
@@ -41,55 +98,125 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
     notFound();
   }
 
+  const serviceJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'MedicalProcedure',
+    name: service.name,
+    description: service.description,
+    procedureType: 'NoninvasiveProcedure',
+    offers: {
+      '@type': 'Offer',
+      price: Number(service.basePrice),
+      priceCurrency: 'INR',
+      availability: 'https://schema.org/InStock',
+      eligibleRegion: {
+        '@type': 'City',
+        name: 'Hyderabad',
+      },
+    },
+    provider: {
+      '@type': 'MedicalBusiness',
+      name: 'Neetha Nursing Service',
+      telephone: '+91-8341069693',
+      url: 'https://neethanursing.in',
+    },
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
-      <div className="bg-white border-b border-gray-100 py-4 px-6">
-        <div className="max-w-6xl mx-auto flex justify-between items-center text-xs">
-          <Link href="/" className="text-sm font-bold text-primary-700">Neetha Nursing Service</Link>
-          <div className="flex gap-4">
-            <Link href="/services" className="hover:text-primary-600">All Services</Link>
-            <Link href="/booking" className="btn-primary py-1 px-3">Book Visit</Link>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col justify-between">
+      {/* Structured Data for Procedure */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }}
+      />
 
-      <main className="max-w-3xl mx-auto py-16 px-4 flex-1 space-y-8">
+      <HeaderNavbar />
+
+      <main className="max-w-4xl mx-auto py-12 px-6 flex-1 space-y-10">
+        {/* Breadcrumb Navigation */}
+        <nav className="flex items-center gap-2 text-xs text-slate-400 font-medium">
+          <Link href="/" className="hover:text-slate-600">Home</Link>
+          <span>/</span>
+          <Link href="/services" className="hover:text-slate-600">Services</Link>
+          <span>/</span>
+          <span className="text-primary-700 font-semibold">{service.name}</span>
+        </nav>
+
+        {/* Hero Header */}
         <div className="space-y-4">
-          <h1 className="text-3xl font-extrabold text-gray-900">{service.name}</h1>
-          <p className="text-sm text-gray-500 leading-relaxed">{service.description}</p>
+          <span className="inline-flex items-center gap-1.5 bg-primary-50 border border-primary-100 text-primary-700 text-[11px] font-extrabold tracking-wider uppercase px-3 py-1.5 rounded-full">
+            <Sparkles className="w-3.5 h-3.5 text-primary-500" />
+            Verified Clinical Care
+          </span>
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight">
+            {service.name} at Home
+          </h1>
+          <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl">
+            {service.description}
+          </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
+        {/* Pricing Card & Clinical Guidelines Grid */}
+        <div className="grid gap-6 md:grid-cols-3 items-start">
           {/* Rate Card */}
-          <div className="bg-white border border-gray-100 p-6 rounded-xl space-y-4 text-center md:col-span-1 shadow-sm">
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Base Rate Pricing</span>
+          <div className="bg-white border border-slate-200 p-6 rounded-2xl space-y-4 text-center md:col-span-1 shadow-md">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block font-mono">
+              Transparent Pricing
+            </span>
             <div className="space-y-1">
-              <span className="text-3xl font-extrabold text-primary-700 block">Rs. {Number(service.basePrice)}</span>
-              <span className="text-xs text-gray-400">per {service.priceUnit}</span>
+              <span className="text-3xl sm:text-4xl font-black text-slate-900 font-mono block">
+                ₹{Number(service.basePrice)}
+              </span>
+              <span className="text-xs text-slate-400 font-medium">per {service.priceUnit}</span>
             </div>
-            <div className="text-[10px] text-gray-400 bg-gray-50 py-1.5 px-2 rounded">
+            <div className="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-100 py-1.5 px-2 rounded-lg font-semibold">
               Min. commitment: {service.minimumDays} {service.priceUnit}(s)
             </div>
             <Link
-              href={`/booking/details?serviceId=${service.id}`}
-              className="w-full inline-flex justify-center items-center py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-colors text-xs"
+              href={`/booking?serviceId=${service.id}`}
+              className="w-full inline-flex justify-center items-center py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-colors text-xs uppercase tracking-wider shadow-lg"
             >
               Book This Service
             </Link>
           </div>
 
           {/* Guidelines */}
-          <div className="bg-white border border-gray-100 p-6 rounded-xl md:col-span-2 space-y-4 text-xs text-gray-600">
-            <h3 className="font-bold text-gray-900 text-sm">What to Expect</h3>
-            <ul className="list-disc pl-5 space-y-2 leading-relaxed">
-              <li>Our caregiver will arrive in proper clinical attire carrying verified credentials and vaccination cards.</li>
-              <li>Consumables like syringes, surgical spirits, cotton, or tapes are included under standard visits.</li>
-              <li>Visits are scheduled under the strict guidance of local supervisors and patient doctors.</li>
-              <li>Daily clinical vitals monitoring (Blood pressure, Pulse rate, SpO2 levels) is standard on all sessions.</li>
+          <div className="bg-white border border-slate-200 p-6 rounded-2xl md:col-span-2 space-y-4 text-xs sm:text-sm text-slate-600 shadow-sm">
+            <h3 className="font-bold text-slate-900 text-base">What to Expect During Your Home Visit</h3>
+            <ul className="space-y-3 leading-relaxed">
+              <li className="flex items-start gap-2.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <span>Our caregiver arrives in professional clinical uniform carrying government ID and nurse credentials.</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <span>Strict sterile techniques followed for wound disinfection, catheter handling, and safe disposal.</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <span>Standard vital signs check (BP, Pulse, Temperature, SpO2) conducted and recorded on every visit.</span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <span>Direct coordination with treating physicians and family members with continuous supervisor oversight.</span>
+              </li>
             </ul>
+
+            <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <span className="text-xs text-slate-500">Need urgent clinical advice?</span>
+              <a
+                href="tel:+918341069693"
+                className="text-primary-700 hover:text-primary-800 font-bold text-xs inline-flex items-center gap-1.5"
+              >
+                <PhoneCall className="w-3.5 h-3.5" />
+                <span>Call 8341069693</span>
+              </a>
+            </div>
           </div>
         </div>
       </main>
+
+      <FaqSection />
     </div>
   );
 }

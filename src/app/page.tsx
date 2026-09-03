@@ -4,6 +4,8 @@ import Image from 'next/image';
 import { prisma } from '@/lib/prisma';
 import QuickBookingForm from '@/components/booking/QuickBookingForm';
 import HeaderNavbar from '@/components/navigation/HeaderNavbar';
+import FaqSection from '@/components/seo/FaqSection';
+import AreasServedSection from '@/components/seo/AreasServedSection';
 import {
   ShieldCheck,
   Lock,
@@ -361,6 +363,9 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Areas We Serve: High-Demand Hyderabad Neighborhoods */}
+      <AreasServedSection />
+
       {/* Patient Success Stories (Google Reviews with Slow Horizontal Scroll & Fade) */}
       <section className="py-24 bg-slate-900 text-white overflow-hidden relative border-y border-slate-800">
         <div className="max-w-6xl mx-auto px-6 mb-12 text-center space-y-3">
@@ -624,6 +629,9 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Frequently Asked Questions with Schema.org FAQPage Rich Snippet JSON-LD */}
+      <FaqSection />
+
       {/* CTA Section */}
       <section className="bg-gradient-to-tr from-primary-900 to-indigo-900 text-white py-16 px-6 text-center">
         <div className="max-w-2xl mx-auto space-y-6">
@@ -668,10 +676,21 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="space-y-3">
-            <h4 className="text-white font-bold text-sm">Operating Areas</h4>
-            <div className="flex items-start gap-2">
-              <MapPin className="w-4 h-4 text-primary-400 shrink-0 mt-0.5" />
-              <p>Lingampally & Gachibowli, Hyderabad, Telangana, India.<br />Serving: Gachibowli, Lingampally, Miyapur, Kondapur, Financial District, BHEL, Madinaguda.</p>
+            <h4 className="text-white font-bold text-sm">Operating Neighborhoods</h4>
+            <div className="flex flex-wrap gap-2 text-xs">
+              <Link href="/locations/lingampally" className="hover:text-primary-400 transition-colors">Lingampally</Link>
+              <span>•</span>
+              <Link href="/locations/gachibowli" className="hover:text-primary-400 transition-colors">Gachibowli</Link>
+              <span>•</span>
+              <Link href="/locations/kondapur" className="hover:text-primary-400 transition-colors">Kondapur</Link>
+              <span>•</span>
+              <Link href="/locations/miyapur" className="hover:text-primary-400 transition-colors">Miyapur</Link>
+              <span>•</span>
+              <Link href="/locations/chandanagar" className="hover:text-primary-400 transition-colors">Chandanagar</Link>
+              <span>•</span>
+              <Link href="/locations/madhapur" className="hover:text-primary-400 transition-colors">Madhapur</Link>
+              <span>•</span>
+              <Link href="/locations/financial-district" className="hover:text-primary-400 transition-colors">Financial District</Link>
             </div>
           </div>
           <div className="space-y-3">
