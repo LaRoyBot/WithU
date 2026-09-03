@@ -4,25 +4,40 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { decrypt } from '@/lib/crypto';
 import { getEmployeeIdentity, hashPassword, revokeCurrentSession, setSession, verifyPassword } from '@/lib/auth';
+import { allowAttempt } from '@/lib/rate-limit';
 
 /**
  * Log in Employee (Nurse) and set secure session cookie
  * Only approved and active employees can log in
  */
 export async function employeeLogin(formData: FormData) {
-  const email = (formData.get('email') as string)?.trim().toLowerCase();
+  const rawInput = (formData.get('email') as string)?.trim() || '';
   const password = formData.get('password') as string;
 
-  if (!email || !password) {
-    return { error: 'Please enter both login email and password' };
+  if (!rawInput || !password) {
+    return { error: 'Please enter both login identifier and password' };
+  }
+
+  // Normalize phone if input is digits
+  const cleanDigits = rawInput.replace(/\D/g, '');
+  const isPhone = cleanDigits.length >= 10;
+  const normalizedPhone = isPhone
+    ? (cleanDigits.length === 10 ? `+91${cleanDigits}` : (rawInput.startsWith('+') ? rawInput : `+${cleanDigits}`))
+    : null;
+  const normalizedEmail = !isPhone ? rawInput.toLowerCase() : null;
+
+  const rateLimitKey = normalizedPhone || normalizedEmail || rawInput;
+  if (!allowAttempt('employee-login', rateLimitKey, 5, 15 * 60 * 1000)) {
+    return { error: 'Too many login attempts. Please try again after 15 minutes.' };
   }
 
   try {
     const nurse = await prisma.nurse.findFirst({
       where: {
         OR: [
-          { email: email },
-          { phone: email },
+          ...(normalizedEmail ? [{ email: normalizedEmail }] : []),
+          ...(normalizedPhone ? [{ phone: normalizedPhone }] : []),
+          { phone: rawInput },
         ],
       },
     });
@@ -140,6 +155,20 @@ export async function submitJobClaim(data: {
   const session = await getEmployeeSession();
   if (!session) {
     return { error: 'Please log in to submit a job proposal' };
+  }
+
+  // Schema & boundary validation
+  if (typeof data.proposedPrice !== 'number' || isNaN(data.proposedPrice) || data.proposedPrice <= 0) {
+    return { error: 'Please propose a valid positive price.' };
+  }
+  if (!data.proposedArea?.trim() || data.proposedArea.trim().length < 2) {
+    return { error: 'Please specify a valid service area.' };
+  }
+  if (!data.proposedTime?.trim() || data.proposedTime.trim().length < 2) {
+    return { error: 'Please specify a proposed time slot.' };
+  }
+  if (data.notes && data.notes.length > 500) {
+    return { error: 'Notes cannot exceed 500 characters.' };
   }
 
   try {
