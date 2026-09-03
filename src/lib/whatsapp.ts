@@ -9,6 +9,10 @@ interface WhatsAppPayload {
   parameters: string[];
 }
 
+export function isWhatsAppConfigured(): boolean {
+  return Boolean(process.env.WHATSAPP_API_KEY && process.env.WHATSAPP_API_ENDPOINT);
+}
+
 /**
  * Low-level HTTP caller to WhatsApp Business CSP Endpoint
  */

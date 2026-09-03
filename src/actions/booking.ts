@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { decrypt, encrypt } from '@/lib/crypto';
 import { bookingDetailsSchema, publicBookingSchema, type BookingDetailsInput } from '@/lib/validations/booking';
-import { sendBookingConfirmation, sendCustomerOtp } from '@/lib/whatsapp';
+import { sendAdminNewBookingAlert, sendBookingConfirmation, sendCustomerOtp, isWhatsAppConfigured } from '@/lib/whatsapp';
 import { revalidatePath } from 'next/cache';
 import { createHash, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 import { allowAttempt } from '@/lib/rate-limit';
@@ -118,7 +118,25 @@ export async function submitPublicBooking(data: {
     const startDate = data.dateNeeded ? new Date(data.dateNeeded) : new Date();
     const endDate = new Date(startDate.getTime() + 24 * 60 * 60 * 1000); // 1-day minimum
 
-    // 5. Create Booking in CONFIRMED state for Admin queue & Open Job Board
+    // 5. Determine whether messaging gateway is configured
+    const messagingConfigured = isWhatsAppConfigured();
+    let otpSent = false;
+    const otpCode = String(randomInt(100000, 1000000));
+
+    if (messagingConfigured) {
+      try {
+        otpSent = await sendCustomerOtp(cleanPhone, otpCode);
+      } catch (err) {
+        console.warn('[BOOKING OTP] Dispatch failed:', err);
+        otpSent = false;
+      }
+    } else {
+      console.warn('[BOOKING OTP] WhatsApp/SMS integration unconfigured. Falling back to direct lead capture.');
+    }
+
+    const initialStatus = otpSent ? 'PENDING_OTP' : 'CONFIRMED';
+
+    // Create Booking row
     const booking = await prisma.booking.create({
       data: {
         bookingNumber,
@@ -137,7 +155,9 @@ export async function submitPublicBooking(data: {
         patientGender: 'Other',
         medicalConditions: encryptedConditions,
         specialInstructions: encryptedInstructions,
-        status: 'PENDING_OTP',
+        status: initialStatus,
+        otpCode: otpSent ? hashOtp(otpCode) : null,
+        otpExpires: otpSent ? new Date(Date.now() + 5 * 60 * 1000) : null,
       },
     });
 
@@ -146,23 +166,30 @@ export async function submitPublicBooking(data: {
       data: {
         bookingId: booking.id,
         fromStatus: 'PENDING',
-        toStatus: 'PENDING_OTP',
-        notes: 'Public booking submitted; awaiting phone verification.',
+        toStatus: initialStatus,
+        notes: otpSent
+          ? 'Public booking submitted; awaiting phone OTP verification.'
+          : 'Public booking captured directly for admin coordination (SMS/WhatsApp gateway offline).',
       },
     });
 
-    const otpCode = String(randomInt(100000, 1000000));
-    await prisma.booking.update({
-      where: { id: booking.id },
-      data: {
-        otpCode: hashOtp(otpCode),
-        otpExpires: new Date(Date.now() + 5 * 60 * 1000),
-      },
-    });
-    try {
-      await sendCustomerOtp(cleanPhone, otpCode);
-    } catch {
-      return { success: false, error: 'Could not send verification code. Please try again later.' };
+    // 7. Dispatch lead alert to Admin if configured
+    if (messagingConfigured) {
+      try {
+        await sendAdminNewBookingAlert({
+          bookingNumber,
+          customerName: data.name.trim(),
+          customerPhone: cleanPhone,
+          area: data.area!.trim(),
+          serviceName: serviceDisplayName,
+          price: calculatedPrice,
+          promoCode: data.promoCode?.trim(),
+          message: clinicalNotes,
+          hasPrescription: false,
+        });
+      } catch (adminAlertErr) {
+        console.warn('[ADMIN ALERT] Failed to notify admin via WhatsApp:', adminAlertErr);
+      }
     }
 
     revalidatePath('/admin');
@@ -176,7 +203,7 @@ export async function submitPublicBooking(data: {
       customerPhone: cleanPhone,
       serviceName: serviceDisplayName,
       totalAmount: calculatedPrice,
-      requiresVerification: true,
+      requiresVerification: otpSent,
     };
   } catch (err: any) {
     console.error('Public booking submission error:', err);

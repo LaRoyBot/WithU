@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { submitPublicBooking, verifyBookingOtp } from '@/actions/booking';
+import { submitPublicBooking, verifyBookingOtp, resendBookingOtp } from '@/actions/booking';
 import Link from 'next/link';
 import Image from 'next/image';
 import ModernPaymentSection from './ModernPaymentSection';
@@ -146,6 +146,7 @@ export default function TwoStepBookingForm({ services }: TwoStepBookingFormProps
   // Success Confirmation Screen
   if (submittedBooking) {
     const verifySubmittedBooking = async () => {
+      setError(null);
       const result = await verifyBookingOtp(submittedBooking.bookingId, bookingOtp);
       if (result.success) {
         setBookingVerified(true);
@@ -154,6 +155,17 @@ export default function TwoStepBookingForm({ services }: TwoStepBookingFormProps
         setError(result.error || 'Unable to verify your booking.');
       }
     };
+
+    const handleResendOtp = async () => {
+      setError(null);
+      const result = await resendBookingOtp(submittedBooking.bookingId);
+      if (result.success) {
+        setError(null);
+      } else {
+        setError(result.error || 'Failed to resend verification code.');
+      }
+    };
+
     return (
       <div className="bg-slate-950/90 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/10 w-full max-w-lg mx-auto text-center space-y-6 animate-in fade-in zoom-in-95 duration-200">
         <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-3xl border border-emerald-500/30">
@@ -162,7 +174,7 @@ export default function TwoStepBookingForm({ services }: TwoStepBookingFormProps
 
         <div>
           <span className="text-[11px] font-mono tracking-widest text-emerald-400 uppercase font-bold block mb-1">
-            Booking Received • Assigned to Admin
+            Booking Received • Assigned to Operations
           </span>
           <h2 className="text-2xl font-black text-white tracking-tight">
             Thank You, {submittedBooking.customerName}!
@@ -185,15 +197,54 @@ export default function TwoStepBookingForm({ services }: TwoStepBookingFormProps
             <span className="font-bold text-emerald-400">₹{submittedBooking.totalAmount}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-500">Dispatch Notification:</span>
-            <span className="text-emerald-400 font-semibold">Sent to Admin WhatsApp</span>
+            <span className="text-slate-500">Lead Status:</span>
+            <span className="text-emerald-400 font-semibold">
+              {submittedBooking.requiresVerification && !bookingVerified
+                ? 'Pending Phone Verification'
+                : 'Queued for Nurse Dispatch'}
+            </span>
           </div>
         </div>
 
-        {!bookingVerified && (
-          <div className="flex gap-2">
-            <input value={bookingOtp} onChange={(e) => setBookingOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" placeholder="Enter 6-digit verification code" className="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-900 px-3 py-3 text-center font-mono text-sm text-white focus:border-purple-500 focus:outline-none" />
-            <button type="button" onClick={verifySubmittedBooking} disabled={bookingOtp.length !== 6} className="rounded-xl bg-purple-600 px-4 py-3 text-xs font-bold uppercase tracking-wide text-white disabled:opacity-50">Verify</button>
+        {error && (
+          <div className="p-3 bg-red-950/60 border border-red-500/40 text-red-200 text-xs rounded-xl text-left">
+            ⚠️ {error}
+          </div>
+        )}
+
+        {submittedBooking.requiresVerification && !bookingVerified ? (
+          <div className="space-y-3">
+            <p className="text-xs text-slate-400">
+              Please enter the 6-digit verification code sent to your phone:
+            </p>
+            <div className="flex gap-2">
+              <input
+                value={bookingOtp}
+                onChange={(e) => setBookingOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                inputMode="numeric"
+                placeholder="Enter 6-digit code"
+                className="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-900 px-3 py-3 text-center font-mono text-sm text-white focus:border-purple-500 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={verifySubmittedBooking}
+                disabled={bookingOtp.length !== 6}
+                className="rounded-xl bg-purple-600 px-4 py-3 text-xs font-bold uppercase tracking-wide text-white disabled:opacity-50 cursor-pointer"
+              >
+                Verify
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={handleResendOtp}
+              className="text-[11px] text-purple-400 hover:text-purple-300 underline cursor-pointer"
+            >
+              Resend verification code
+            </button>
+          </div>
+        ) : (
+          <div className="p-3 bg-purple-950/30 border border-purple-500/20 rounded-xl text-xs text-slate-300">
+            Our nursing care coordinator will call you at <strong className="text-white">{submittedBooking.customerPhone}</strong> within 15 minutes to confirm nurse availability and schedule your visit.
           </div>
         )}
 
