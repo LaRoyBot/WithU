@@ -6,6 +6,7 @@ import QuickBookingForm from '@/components/booking/QuickBookingForm';
 import HeaderNavbar from '@/components/navigation/HeaderNavbar';
 import FaqSection from '@/components/seo/FaqSection';
 import AreasServedSection from '@/components/seo/AreasServedSection';
+import HeroBackgroundSlider from '@/components/hero/HeroBackgroundSlider';
 import {
   ShieldCheck,
   Lock,
@@ -58,50 +59,70 @@ export default async function HomePage() {
       {/* Header / Navigation */}
       <HeaderNavbar />
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-white py-16 lg:py-24 px-6 border-b border-slate-100">
-        {/* Subtle background glow matching kovai.co */}
-        <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-primary-100/30 rounded-full blur-3xl pointer-events-none -z-10"></div>
-        <div className="absolute bottom-10 left-1/3 w-[300px] h-[300px] bg-blue-50/40 rounded-full blur-3xl pointer-events-none -z-10"></div>
-
-        <div className="max-w-6xl mx-auto grid gap-12 lg:grid-cols-12 items-center">
+      {/* Hero Section with Cinematic Sliding Background Carousel */}
+      <HeroBackgroundSlider>
+        <div className="grid gap-10 lg:grid-cols-12 items-center">
+          {/* Left Column: Value Proposition & Reassurance */}
           <div className="lg:col-span-7 space-y-6 text-left">
-            <span className="inline-flex items-center gap-1.5 bg-primary-50 border border-primary-100 text-primary-700 text-[11px] font-extrabold tracking-wider uppercase px-3 py-1.5 rounded-full">
-              <Sparkles className="w-3.5 h-3.5 text-primary-500" />
-              Certified Healthcare at Home
+            <span className="inline-flex items-center gap-2 bg-primary-950/80 border border-primary-500/40 text-primary-300 text-[11px] font-extrabold tracking-wider uppercase px-3.5 py-1.5 rounded-full backdrop-blur-md shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-primary-400" />
+              <span>Certified Healthcare at Home • Since 2015</span>
             </span>
 
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.1] font-sans">
-              Professional nursing care, in your own <span className="text-primary-600 font-serif font-semibold italic">comfort home.</span>
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.1] font-sans drop-shadow-md">
+              Professional nursing care, in your own <span className="text-primary-400 font-serif font-semibold italic">comfort home.</span>
             </h1>
 
-            <p className="text-sm sm:text-base text-slate-500 max-w-xl leading-relaxed">
-              Operating across Lingampally & Miyapur, Hyderabad since 2015. We bring certified, background-verified caregivers to your doorstep for injections, dressings, post-surgical recovery, and dedicated elderly support.
+            <p className="text-sm sm:text-base text-slate-200 max-w-xl leading-relaxed drop-shadow">
+              Operating across Lingampally, Gachibowli, Kondapur & Miyapur, Hyderabad. We bring certified, background-verified nurses to your doorstep for injections, sterile surgical dressings, post-operative recovery, and dedicated 24/7 elderly bedside support.
             </p>
 
-            <div className="pt-4 flex flex-col sm:flex-row gap-4">
+            <div className="pt-2 flex flex-col sm:flex-row gap-4">
               <Link
                 href="/booking"
-                className="w-full sm:w-auto inline-flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-bold py-3.5 px-8 rounded-full shadow-lg shadow-primary-600/10 hover:shadow-primary-600/20 hover:-translate-y-0.5 transition-all duration-200 text-sm gap-2"
+                className="w-full sm:w-auto inline-flex items-center justify-center bg-primary-600 hover:bg-primary-500 text-white font-bold py-3.5 px-8 rounded-full shadow-lg shadow-primary-600/30 hover:-translate-y-0.5 transition-all duration-200 text-sm gap-2"
               >
                 Schedule Visit Now <ArrowRight className="w-4 h-4" />
               </Link>
               <a
                 href="https://wa.me/918341069693"
-                className="w-full sm:w-auto inline-flex items-center justify-center bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold py-3.5 px-8 rounded-full shadow-lg shadow-[#25D366]/20 hover:shadow-[#25D366]/30 hover:-translate-y-0.5 transition-all duration-200 text-sm gap-2"
+                className="w-full sm:w-auto inline-flex items-center justify-center bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold py-3.5 px-8 rounded-full shadow-lg shadow-[#25D366]/30 hover:-translate-y-0.5 transition-all duration-200 text-sm gap-2"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <MessageSquare className="w-4 h-4" /> Chat on WhatsApp
               </a>
             </div>
+
+            {/* Quick Hero Reassurance Badges */}
+            <div className="pt-4 flex flex-wrap items-center gap-6 text-xs text-slate-300 font-medium">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>GNM / B.Sc. Verified Nurses</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>30 - 45 Min Dispatch</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Pay at Doorstep Option</span>
+              </div>
+            </div>
           </div>
 
+          {/* Right Column: Floating Glassmorphism Booking Card */}
           <div className="lg:col-span-5 w-full max-w-md mx-auto lg:max-w-none">
-            <QuickBookingForm services={servicesList} />
+            <div className="relative">
+              {/* Subtle back illumination */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary-500/20 to-indigo-500/20 rounded-3xl blur-xl" />
+              <div className="relative">
+                <QuickBookingForm services={servicesList} />
+              </div>
+            </div>
           </div>
         </div>
-      </section>
+      </HeroBackgroundSlider>
 
       {/* Trust Badge Bar */}
       <section className="bg-white border-b border-slate-100 py-8 px-6">
