@@ -79,9 +79,10 @@ export default function QuickBookingForm({ services }: QuickBookingFormProps) {
   };
 
   return (
-    <div className="bg-[#242938] rounded-2xl p-5 sm:p-6 shadow-2xl border border-white/5 w-full max-w-[390px] mx-auto text-white">
-      <h2 className="text-xl sm:text-2xl font-black text-white text-center mb-4 tracking-tight uppercase">
-        BOOK NOW
+    <div className="bg-slate-900/85 backdrop-blur-xl rounded-2xl p-5 sm:p-6 shadow-2xl border border-white/15 w-full max-w-[390px] mx-auto text-white ring-1 ring-white/10">
+      <h2 className="text-xl sm:text-2xl font-black text-white text-center mb-4 tracking-tight uppercase flex items-center justify-center gap-2">
+        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+        <span>BOOK NOW</span>
       </h2>
 
       {error && (
