@@ -1,129 +1,101 @@
 import React from 'react';
 import Link from 'next/link';
-import { Calendar, MessageSquare, Clock, ShieldCheck, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { HelpCircle, Stethoscope, ArrowRight, PhoneCall, ShieldCheck, MapPin } from 'lucide-react';
 
 interface InArticleBookingCardProps {
   primaryServiceSlug: string;
   articleTitle: string;
 }
 
-const SERVICE_LOOKUP: Record<string, { name: string; price: number; unit: string; description: string }> = {
+const SERVICE_LOOKUP: Record<string, { name: string; description: string; topicAdvice: string }> = {
   'post-surgical-care': {
-    name: 'Post-Surgical Nursing Care',
-    price: 1500,
-    unit: 'day',
-    description: 'Vitals tracking, surgical drain maintenance, and recovery oversight at home.'
+    name: 'Post-Surgical Nursing Support',
+    description: 'Sterile surgical dressing changes, vitals tracking, and drain supervision.',
+    topicAdvice: 'If you observe persistent drainage, high fever, or need sterile incision dressings after discharge, professional bedside assistance helps avoid hospital readmission.'
   },
   'wound-surgical-dressing': {
-    name: 'Sterile Wound & Surgical Dressing',
-    price: 450,
-    unit: 'visit',
-    description: 'Aseptic dressing changes for surgical cuts, diabetic ulcers, and wounds.'
+    name: 'Sterile Wound & Diabetic Ulcer Dressing',
+    description: 'Aseptic debridement assessment, multi-layer dressing, and healing monitoring.',
+    topicAdvice: 'Diabetic foot ulcers and non-healing wounds require strict aseptic technique to prevent deep tissue infection and osteomyelitis.'
   },
   'urinary-catheter-change': {
-    name: 'Urinary Catheter Insertion & Change',
-    price: 600,
-    unit: 'visit',
-    description: 'Sterile Foley catheterization and urobag flushing by trained nurses.'
+    name: 'Catheter Insertion, Flushing & Replacement',
+    description: 'Hygienic Foley catheterization, urobag maintenance, and blockage management.',
+    topicAdvice: 'Catheter blockages, severe spasms, or cloudy urine with fever require prompt clinical evaluation to prevent CAUTI and kidney complications.'
   },
   'dedicated-24-7-nursing': {
-    name: '24/7 Dedicated Bedside Nursing',
-    price: 2500,
-    unit: 'day',
-    description: 'Round-the-clock intensive bedside care for elderly and critical patients.'
+    name: '24/7 Dedicated Bedside Nursing Care',
+    description: 'Round-the-clock intensive elderly assistance, bedridden patient turning, and vitals monitoring.',
+    topicAdvice: 'For bedridden elders recovering from stroke or acute hospitalizations, continuous bedside care prevents bedsores, falls, and aspiration pneumonia.'
   },
   'at-home-ivf-support': {
     name: 'At-Home IVF Hormone Injections',
-    price: 400,
-    unit: 'visit',
-    description: 'On-time subcutaneous and intramuscular progesterone/hCG injections.'
+    description: 'Scheduled subcutaneous and deep intramuscular hormone administration.',
+    topicAdvice: 'Strict timing protocols for stimulation hormones and hCG triggers are vital for IVF cycle success. Timely home nurse visits ensure stress-free administration.'
   },
   'iv-infusion-hydration': {
-    name: 'IV Fluid Infusion & Saline Therapy',
-    price: 500,
-    unit: 'visit',
-    description: 'Safe intravenous cannulation, antibiotic infusion, and saline setup.'
+    name: 'IV Saline, Hydration & Antibiotic Infusion',
+    description: 'Doctor-prescribed intravenous cannulation, flow-rate monitoring, and phlebitis checks.',
+    topicAdvice: 'Never administer IV infusions without a doctor prescription. Certified nurses ensure correct vein selection, drip rate calibration, and immediate complication checks.'
   },
   'physiotherapy-rehab': {
-    name: 'Home Physiotherapy & Stroke Rehab',
-    price: 800,
-    unit: 'visit',
-    description: 'Passive range-of-motion, mobility restoration, and stroke therapy.'
+    name: 'Home Physiotherapy & Stroke Rehabilitation',
+    description: 'Bedside mobility restoration, passive range-of-motion, and contracture prevention.',
+    topicAdvice: 'The first 90 days following a stroke represent the golden window for neuroplastic recovery. Early physical therapy helps restore independence.'
   }
 };
 
 export default function InArticleBookingCard({ primaryServiceSlug, articleTitle }: InArticleBookingCardProps) {
   const service = SERVICE_LOOKUP[primaryServiceSlug] || SERVICE_LOOKUP['post-surgical-care'];
 
-  const whatsappMessage = encodeURIComponent(
-    `Hello Neetha Nursing Service, I was reading your guide on "${articleTitle}" and need a verified nurse for ${service.name} in Hyderabad.`
-  );
-
   return (
-    <div className="my-10 bg-gradient-to-br from-primary-950 via-slate-900 to-primary-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-primary-800/80 relative overflow-hidden">
-      {/* Background Accent Glow */}
-      <div className="absolute -right-16 -bottom-16 w-64 h-64 rounded-full bg-primary-600/20 blur-3xl pointer-events-none" />
-
-      <div className="relative z-10 space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+    <div className="my-10 bg-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-md border border-slate-800 relative overflow-hidden">
+      <div className="space-y-4 relative z-10">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
           <div className="flex items-center gap-2 text-primary-300 text-xs font-bold uppercase tracking-wider">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>Need Clinical Assistance at Home?</span>
+            <Stethoscope className="w-4 h-4 text-primary-400" />
+            <span>Need Clinical Guidance or Local Nurse Support?</span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-slate-300 bg-white/10 px-3 py-1 rounded-full backdrop-blur-sm">
-            <Clock className="w-3.5 h-3.5 text-primary-300" />
-            <span>30-45 Min Dispatch in Hyderabad</span>
+          <div className="flex items-center gap-1.5 text-xs text-slate-400">
+            <MapPin className="w-3.5 h-3.5 text-slate-400" />
+            <span>Serving Hyderabad & Telangana</span>
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-12 gap-6 items-center">
-          <div className="sm:col-span-8 space-y-2">
-            <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white font-sans">
-              Book a Certified Nurse for {service.name}
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              {service.description} Hospital-trained GNM/B.Sc nurses available across Lingampally, Gachibowli, Kondapur, and Miyapur.
+        <div className="space-y-2">
+          <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+            Connecting Medical Information to Real Patient Care
+          </h3>
+          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            {service.topicAdvice}
+          </p>
+        </div>
+
+        <div className="bg-slate-800/80 p-4 rounded-2xl border border-slate-700/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs">
+          <div className="space-y-1">
+            <span className="font-bold text-white block">
+              Have clinical questions or need a verified nurse in Hyderabad?
+            </span>
+            <p className="text-slate-400">
+              Neetha Nursing Service coordinates certified GNM/B.Sc nurses for home visits, doctor-directed procedures, and family bedside guidance.
             </p>
-            <div className="flex flex-wrap items-center gap-3 pt-2 text-xs text-slate-300">
-              <span className="flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Zero Advance Deposit</span>
-              </span>
-              <span className="flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Aseptic Sterile Kits</span>
-              </span>
-            </div>
           </div>
-
-          <div className="sm:col-span-4 bg-white/10 p-4 rounded-2xl border border-white/15 text-center space-y-2 backdrop-blur-md">
-            <div className="text-[11px] text-primary-200 uppercase tracking-wider font-bold">Standard Rate</div>
-            <div className="text-3xl font-black font-mono text-white tracking-tight">
-              ₹{service.price}
-              <span className="text-xs font-sans text-slate-300 font-normal">/{service.unit}</span>
-            </div>
-            <div className="text-[10px] text-slate-300">Inclusive of nurse home visit</div>
+          <div className="flex items-center gap-3 shrink-0">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 bg-primary-600 hover:bg-primary-500 text-white font-bold py-2.5 px-4 rounded-xl transition-colors shadow-sm"
+            >
+              <span>Visit neethanursing.in</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+            <a
+              href="tel:+918341069693"
+              className="inline-flex items-center gap-1.5 border border-slate-600 hover:border-slate-500 text-slate-200 hover:text-white font-bold py-2.5 px-4 rounded-xl transition-colors"
+            >
+              <PhoneCall className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Talk to Coordinator</span>
+            </a>
           </div>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-3 pt-2">
-          <Link
-            href="/booking"
-            className="flex-1 inline-flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-400 text-white font-bold py-3 px-6 rounded-xl text-xs sm:text-sm shadow-md transition-all group"
-          >
-            <Calendar className="w-4 h-4" />
-            <span>Book Home Visit Online</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </Link>
-          <a
-            href={`https://wa.me/918341069693?text=${whatsappMessage}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white font-bold py-3 px-6 rounded-xl text-xs sm:text-sm shadow-md transition-all"
-          >
-            <MessageSquare className="w-4 h-4" />
-            <span>Chat with Nurse on WhatsApp</span>
-          </a>
         </div>
       </div>
     </div>

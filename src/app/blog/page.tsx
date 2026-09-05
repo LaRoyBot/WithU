@@ -94,10 +94,10 @@ export default function BlogIndexPage() {
 
             <div className="space-y-3 max-w-3xl">
               <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight font-serif leading-tight">
-                Clinical Care Guides for <span className="text-primary-400 italic font-medium">Families & Patients.</span>
+                Frequently Asked Clinical Questions & <span className="text-primary-400 italic font-medium">Family Care Guides.</span>
               </h1>
               <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-                Step-by-step guidance from registered nurses on post-surgical recovery, diabetic wound dressings, catheter hygiene, bedsore prevention, and elderly care at home across Hyderabad.
+                Objective, medically accurate answers to critical questions on surgical wound dressing, bedsore prevention, catheter troubleshooting, and home procedures from certified registered nurses in Hyderabad.
               </p>
             </div>
 

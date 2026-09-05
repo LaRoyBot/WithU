@@ -30,10 +30,6 @@ export default function HeaderNavbar() {
         {/* Desktop Navigation Links */}
         <nav className="hidden md:flex gap-7 text-[13px] font-semibold text-slate-600 items-center">
           <Link href="/services" className="hover:text-primary-600 transition-colors">Our Services</Link>
-          <Link href="/blog" className="hover:text-primary-600 transition-colors flex items-center gap-1">
-            <span>Care Guides</span>
-            <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-primary-100 text-primary-700">New</span>
-          </Link>
           <Link href="/about" className="hover:text-primary-600 transition-colors">About Us</Link>
           <Link href="/contact" className="hover:text-primary-600 transition-colors">Contact</Link>
           <Link href="/customer/login" className="text-slate-700 hover:text-primary-600 transition-colors flex items-center gap-1.5 font-medium">
@@ -135,17 +131,6 @@ export default function HeaderNavbar() {
                 <div className="flex items-center gap-2.5">
                   <Sparkles className="w-4 h-4 text-primary-400" />
                   <span>Clinical Nursing Services & Rates</span>
-                </div>
-                <span className="text-slate-500">→</span>
-              </Link>
-              <Link
-                href="/blog"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between p-2.5 rounded-lg hover:bg-slate-800/60 text-slate-200 hover:text-white text-xs font-medium transition-colors"
-              >
-                <div className="flex items-center gap-2.5">
-                  <BookOpen className="w-4 h-4 text-primary-400" />
-                  <span>Clinical Care Guides & Health Blog</span>
                 </div>
                 <span className="text-slate-500">→</span>
               </Link>

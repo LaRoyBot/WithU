@@ -8,6 +8,7 @@ import FaqSection from '@/components/seo/FaqSection';
 import AreasServedSection from '@/components/seo/AreasServedSection';
 import HeroBackgroundSlider from '@/components/hero/HeroBackgroundSlider';
 import Footer from '@/components/navigation/Footer';
+import { BLOG_ARTICLES } from '@/data/blogArticles';
 import {
   ShieldCheck,
   Lock,
@@ -22,7 +23,9 @@ import {
   ArrowRight,
   Sparkles,
   ClipboardList,
-  MessageCircle
+  MessageCircle,
+  BookOpen,
+  HelpCircle
 } from 'lucide-react';
 
 export const revalidate = 0;
@@ -664,6 +667,63 @@ export default async function HomePage() {
 
       {/* Frequently Asked Questions with Schema.org FAQPage Rich Snippet JSON-LD */}
       <FaqSection />
+
+      {/* Clinical Knowledge & Family Care Guides (Positioned at bottom above footer) */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-slate-100/70 border-t border-slate-200">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div className="space-y-2 max-w-2xl">
+              <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-primary-700 bg-primary-50 px-3 py-1 rounded-full border border-primary-100">
+                <BookOpen className="w-3.5 h-3.5 text-primary-600" />
+                <span>Clinical Care Guides & Health Literacy</span>
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-serif">
+                Essential Nursing Knowledge & Family Care Guides
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Objective, medically reviewed answers to critical questions on post-operative healing, elderly bedsore prevention, catheter troubleshooting, and home procedures.
+              </p>
+            </div>
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-2 text-xs font-bold text-primary-700 hover:text-primary-800 bg-white border border-slate-200 hover:border-primary-300 py-2.5 px-4 rounded-xl shadow-sm transition-all shrink-0"
+            >
+              <span>Explore All Guides & Clinical FAQs</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            {BLOG_ARTICLES.slice(0, 4).map((guide) => (
+              <Link
+                key={guide.slug}
+                href={`/blog/${guide.slug}`}
+                className="group bg-white rounded-2xl border border-slate-200/90 hover:border-primary-300 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+              >
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between text-[11px] text-slate-400">
+                    <span className="font-extrabold uppercase text-primary-600 tracking-wider text-[10px]">
+                      {guide.categoryLabel}
+                    </span>
+                    <span>{guide.readTimeMinutes} min read</span>
+                  </div>
+                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-primary-700 transition-colors line-clamp-2 leading-snug">
+                    {guide.title}
+                  </h3>
+                  <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                    {guide.metaDescription}
+                  </p>
+                </div>
+
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-primary-600 font-bold">
+                  <span>Read Clinical Q&A</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* CTA Section */}
       <section className="bg-gradient-to-tr from-primary-900 to-indigo-900 text-white py-16 px-6 text-center">

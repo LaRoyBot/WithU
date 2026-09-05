@@ -6,6 +6,20 @@ export type BlogCategory =
   | 'ivf-infusion'
   | 'caregiver-guides';
 
+export type QuestionUrgency = 'CRITICAL' | 'PRACTICAL' | 'CURIOUS';
+
+export interface ClinicalQuestionAnswer {
+  id: string;
+  category: QuestionUrgency; // Critical vs Practical vs Curious
+  question: string;
+  shortAnswer: string;
+  detailedAnswer: string[];
+  clinicalSignificance?: string; // e.g. Why this matters biologically or medically
+  whatToLookFor?: string[]; // concrete warning signs or symptoms
+  practicalProtocol?: string[]; // step-by-step guidance
+  whenToContactProfessional: string; // Guidance on when to visit hospital or arrange home clinical care at neethanursing.in
+}
+
 export interface ClinicalReviewer {
   name: string;
   role: string;
@@ -18,18 +32,6 @@ export interface EmergencyRedFlag {
   sign: string;
   actionRequired: string;
   urgency: 'IMMEDIATE_EMERGENCY' | 'CALL_NURSE_PROMPTLY' | 'MONITOR_CLOSELY';
-}
-
-export interface StepGuidance {
-  stepNumber: number;
-  title: string;
-  description: string;
-  sterileTip?: string;
-}
-
-export interface ClinicalArticleFaq {
-  question: string;
-  answer: string;
 }
 
 export interface ClinicalArticle {
@@ -58,7 +60,11 @@ export interface ClinicalArticle {
   }[];
   keyTakeaways: string[];
   emergencyRedFlags: EmergencyRedFlag[];
-  clinicalSteps?: StepGuidance[];
+  // Structured FAQ categories
+  criticalQuestions: ClinicalQuestionAnswer[];
+  practicalQuestions: ClinicalQuestionAnswer[];
+  curiousQuestions: ClinicalQuestionAnswer[];
+  // Deep editorial content sections
   contentSections: {
     id: string;
     heading: string;
@@ -72,5 +78,5 @@ export interface ClinicalArticle {
   }[];
   relatedServiceSlugs: string[];
   relatedLocationSlugs: string[];
-  faqs: ClinicalArticleFaq[];
 }
+

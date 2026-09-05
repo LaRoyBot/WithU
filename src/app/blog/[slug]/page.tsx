@@ -9,6 +9,7 @@ import ClinicalReviewBadge from '@/components/blog/ClinicalReviewBadge';
 import EmergencyRedFlags from '@/components/blog/EmergencyRedFlags';
 import InArticleBookingCard from '@/components/blog/InArticleBookingCard';
 import TableOfContents from '@/components/blog/TableOfContents';
+import ClinicalFaqSection from '@/components/blog/ClinicalFaqAccordion';
 import { BLOG_ARTICLES } from '@/data/blogArticles';
 import { HYDERABAD_LOCALITIES } from '@/components/seo/AreasServedSection';
 import {
@@ -23,7 +24,8 @@ import {
   ArrowRight,
   MapPin,
   Sparkles,
-  Share2
+  Share2,
+  BookOpen
 } from 'lucide-react';
 
 interface ArticlePageProps {
@@ -89,8 +91,15 @@ export default async function BlogArticlePage({ params }: ArticlePageProps) {
 
   const primaryServiceSlug = article.relatedServiceSlugs[0] || 'post-surgical-care';
   const whatsappUrl = `https://wa.me/918341069693?text=${encodeURIComponent(
-    `Hello Neetha Nursing, I read your clinical guide on "${article.title}" and need nursing support in Hyderabad.`
+    `Hello Neetha Nursing, I read your clinical FAQ guide on "${article.title}" and need nursing support in Hyderabad.`
   )}`;
+
+  // Aggregate all clinical FAQs for structured FAQPage JSON-LD schema
+  const allQuestions = [
+    ...(article.criticalQuestions || []),
+    ...(article.practicalQuestions || []),
+    ...(article.curiousQuestions || []),
+  ];
 
   // Multi-Schema JSON-LD Graph
   const structuredDataGraph = {
@@ -141,12 +150,12 @@ export default async function BlogArticlePage({ params }: ArticlePageProps) {
       {
         '@type': 'FAQPage',
         '@id': `https://neethanursing.in/blog/${article.slug}#faq`,
-        mainEntity: article.faqs.map((faq) => ({
+        mainEntity: allQuestions.map((q) => ({
           '@type': 'Question',
-          name: faq.question,
+          name: q.question,
           acceptedAnswer: {
             '@type': 'Answer',
-            text: faq.answer,
+            text: `${q.shortAnswer} ${q.detailedAnswer.join(' ')}`,
           },
         })),
       },
@@ -272,40 +281,12 @@ export default async function BlogArticlePage({ params }: ArticlePageProps) {
               {/* Emergency Red Flags Callout */}
               <EmergencyRedFlags flags={article.emergencyRedFlags} />
 
-              {/* Clinical Steps Guidance (if available) */}
-              {article.clinicalSteps && article.clinicalSteps.length > 0 && (
-                <div className="space-y-4 my-8">
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
-                    <ShieldCheck className="w-5 h-5 text-primary-600" />
-                    <span>Sterile Step-by-Step Clinical Procedure</span>
-                  </h3>
-                  <div className="space-y-4">
-                    {article.clinicalSteps.map((step) => (
-                      <div
-                        key={step.stepNumber}
-                        className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-2"
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-6 h-6 rounded-full bg-primary-600 text-white font-black text-xs flex items-center justify-center shrink-0">
-                            {step.stepNumber}
-                          </div>
-                          <h4 className="text-sm font-extrabold text-slate-900">
-                            {step.title}
-                          </h4>
-                        </div>
-                        <p className="text-xs sm:text-sm text-slate-600 leading-relaxed pl-8">
-                          {step.description}
-                        </p>
-                        {step.sterileTip && (
-                          <div className="ml-8 mt-2 text-xs bg-emerald-50 text-emerald-800 border border-emerald-200/80 p-2.5 rounded-xl font-medium">
-                            <strong>Sterile Tip:</strong> {step.sterileTip}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* Comprehensive Clinical FAQ Knowledge Engine */}
+              <ClinicalFaqSection
+                criticalQuestions={article.criticalQuestions || []}
+                practicalQuestions={article.practicalQuestions || []}
+                curiousQuestions={article.curiousQuestions || []}
+              />
 
               {/* Main Content Sections */}
               <div className="space-y-8">
@@ -374,30 +355,6 @@ export default async function BlogArticlePage({ params }: ArticlePageProps) {
                   ))}
                 </div>
               </div>
-
-              {/* Frequently Asked Questions */}
-              {article.faqs && article.faqs.length > 0 && (
-                <div className="space-y-4 pt-6">
-                  <h3 className="text-xl font-black text-slate-900 tracking-tight font-serif">
-                    Frequently Asked Questions
-                  </h3>
-                  <div className="space-y-3">
-                    {article.faqs.map((faq, fIdx) => (
-                      <div
-                        key={fIdx}
-                        className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-sm space-y-2"
-                      >
-                        <h4 className="text-sm font-extrabold text-slate-900 leading-snug">
-                          {faq.question}
-                        </h4>
-                        <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                          {faq.answer}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </article>
 
             {/* Right Column: Sticky Sidebar (4 cols) */}
