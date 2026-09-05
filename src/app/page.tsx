@@ -82,8 +82,8 @@ export default async function HomePage() {
                 href="/booking"
                 className="group relative overflow-hidden w-full sm:w-auto inline-flex items-center justify-center bg-primary-600 text-white font-bold py-3.5 px-8 rounded-full shadow-lg shadow-primary-600/30 text-sm transition-shadow duration-[650ms] ease-spring hover:shadow-xl"
               >
-                {/* Expanding Bubble Fill Effect from Bottom Center that fully covers the entire button */}
-                <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-primary-800 transition-transform duration-[650ms] ease-spring group-hover:scale-[22] pointer-events-none" />
+                {/* Expanding Bubble Fill Effect from Bottom Center (scale-0 at rest prevents any visible bump) */}
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-80 h-80 rounded-full bg-primary-800 scale-0 transition-transform duration-[650ms] ease-spring group-hover:scale-100 pointer-events-none origin-center" />
 
                 {/* Label (Shifts left on hover to reveal the incoming arrow) */}
                 <span className="relative z-10 inline-flex items-center gap-1.5 transition-transform duration-[650ms] ease-spring group-hover:-translate-x-2.5">

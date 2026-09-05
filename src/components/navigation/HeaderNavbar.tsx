@@ -51,8 +51,8 @@ export default function HeaderNavbar() {
             href="/booking"
             className="group relative overflow-hidden inline-flex items-center justify-center bg-primary-600 text-white text-xs sm:text-[13px] font-bold px-4 sm:px-6 py-2 sm:py-2.5 rounded-full shadow-sm transition-shadow duration-[650ms] ease-spring hover:shadow-md"
           >
-            {/* Expanding Bubble Fill Effect from Bottom Center that fully covers the entire button */}
-            <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-primary-800 transition-transform duration-[650ms] ease-spring group-hover:scale-[16] pointer-events-none" />
+            {/* Expanding Bubble Fill Effect from Bottom Center (scale-0 at rest prevents any visible bump) */}
+            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-64 h-64 rounded-full bg-primary-800 scale-0 transition-transform duration-[650ms] ease-spring group-hover:scale-100 pointer-events-none origin-center" />
 
             {/* Label (Shifts left on hover to reveal the incoming arrow) */}
             <span className="relative z-10 inline-flex items-center gap-1.5 transition-transform duration-[650ms] ease-spring group-hover:-translate-x-2.5">
