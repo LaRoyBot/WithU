@@ -80,9 +80,20 @@ export default async function HomePage() {
             <div className="pt-2 flex flex-col sm:flex-row gap-4">
               <Link
                 href="/booking"
-                className="w-full sm:w-auto inline-flex items-center justify-center bg-primary-600 hover:bg-primary-500 text-white font-bold py-3.5 px-8 rounded-full shadow-lg shadow-primary-600/30 hover:-translate-y-0.5 transition-all duration-200 text-sm gap-2"
+                className="group relative overflow-hidden w-full sm:w-auto inline-flex items-center justify-center bg-primary-600 text-white font-bold py-3.5 px-8 rounded-full shadow-lg shadow-primary-600/30 text-sm transition-shadow duration-300 hover:shadow-xl"
               >
-                Schedule Visit Now <ArrowRight className="w-4 h-4" />
+                {/* Expanding Bubble Fill Effect from Bottom Center that fully covers the entire button */}
+                <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-primary-800 transition-transform duration-[1000ms] ease-out group-hover:scale-[22] pointer-events-none" />
+
+                {/* Label (Shifts left on hover to reveal the incoming arrow) */}
+                <span className="relative z-10 inline-flex items-center gap-1.5 transition-transform duration-[650ms] ease-out group-hover:-translate-x-2.5">
+                  Schedule Visit Now
+                </span>
+
+                {/* Sliding Arrow Icon (Enters smoothly from right overflow) */}
+                <span className="absolute right-5 z-10 translate-x-4 opacity-0 transition-all duration-[650ms] ease-out group-hover:translate-x-0 group-hover:opacity-100">
+                  <ArrowRight className="w-4 h-4 text-white" />
+                </span>
               </Link>
               <a
                 href="https://wa.me/918341069693"
