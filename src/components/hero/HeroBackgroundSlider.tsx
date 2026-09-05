@@ -3,59 +3,61 @@
 import React from 'react';
 import Image from 'next/image';
 
-const SLIDES = [
-  { src: '/images/original/hero-1.jpg', alt: 'Certified Home Nursing Care' },
-  { src: '/images/original/hero-2.jpg', alt: 'Elderly & Bedridden Patient Care' },
-  { src: '/images/original/hero-3.jpg', alt: 'Post-Surgical Dressing & Recovery' },
-  { src: '/images/original/hero-4.jpg', alt: '24/7 Dedicated Caregiver Assistance' },
-];
-
 interface HeroBackgroundSliderProps {
   children: React.ReactNode;
 }
 
 export default function HeroBackgroundSlider({ children }: HeroBackgroundSliderProps) {
-  // Seamless loop by repeating slides array once (2 identical sets)
-  const duplicatedSlides = [...SLIDES, ...SLIDES];
-
   return (
     <section className="relative overflow-hidden w-full bg-slate-950 border-b border-slate-800 min-h-[640px] lg:min-h-[700px] flex items-center">
       <style jsx global>{`
         @keyframes heroSlowSlide {
           0% {
-            transform: translateX(0%);
+            transform: translate3d(0, 0, 0);
           }
           100% {
-            transform: translateX(-50%);
+            transform: translate3d(-50%, 0, 0);
           }
         }
         .animate-hero-slide {
           display: flex;
-          width: 600%;
-          animation: heroSlowSlide 165s linear infinite;
+          height: 100%;
+          width: max-content;
+          animation: heroSlowSlide 90s linear infinite;
           will-change: transform;
         }
         @media (max-width: 768px) {
           .animate-hero-slide {
-            animation-duration: 120s;
+            animation-duration: 65s;
           }
         }
       `}</style>
 
-      {/* 1. Very Slow Continuous Sliding Background Track */}
+      {/* 1. Very Slow Continuous Sliding Background Track with Seamless Blended Panorama */}
       <div className="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none">
         <div className="animate-hero-slide h-full">
-          {duplicatedSlides.map((slide, idx) => (
-            <div key={idx} className="relative w-[12.5%] h-full shrink-0 min-h-[640px] lg:min-h-[700px]">
-              <Image
-                src={slide.src}
-                alt={slide.alt}
-                fill
-                priority={idx < 2}
-                className="object-cover object-center"
-              />
-            </div>
-          ))}
+          {/* First Panorama Strip */}
+          <div className="relative h-full min-h-[640px] lg:min-h-[700px] shrink-0">
+            <Image
+              src="/images/original/hero-panorama-seamless.jpg"
+              alt="Certified Home Nursing & Clinical Care in Hyderabad"
+              width={2123}
+              height={700}
+              priority
+              className="h-full min-h-[640px] lg:min-h-[700px] w-auto object-cover object-center select-none"
+            />
+          </div>
+
+          {/* Second Duplicate Strip for Flawless Seamless Infinite Stitching */}
+          <div className="relative h-full min-h-[640px] lg:min-h-[700px] shrink-0">
+            <Image
+              src="/images/original/hero-panorama-seamless.jpg"
+              alt="Certified Home Nursing & Clinical Care in Hyderabad"
+              width={2123}
+              height={700}
+              className="h-full min-h-[640px] lg:min-h-[700px] w-auto object-cover object-center select-none"
+            />
+          </div>
         </div>
 
         {/* 2. Soft Balanced Overlay for High Legibility without dimming images */}
