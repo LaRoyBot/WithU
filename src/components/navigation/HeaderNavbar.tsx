@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, X, User, Stethoscope, Shield, Calendar, Phone, Sparkles, Home, Info } from 'lucide-react';
+import { Menu, X, User, Stethoscope, Shield, Calendar, Phone, Sparkles, Home, Info, ArrowRight } from 'lucide-react';
 
 export default function HeaderNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -49,10 +49,21 @@ export default function HeaderNavbar() {
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
             href="/booking"
-            className="bg-primary-600 hover:bg-primary-700 text-white text-xs sm:text-[13px] font-bold px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full transition-all duration-200 shadow-sm hover:shadow-md flex items-center gap-1.5"
+            className="group relative overflow-hidden inline-flex items-center justify-center bg-primary-600 text-white text-xs sm:text-[13px] font-bold px-4 sm:px-6 py-2 sm:py-2.5 rounded-full shadow-sm transition-shadow duration-300 hover:shadow-md"
           >
-            <Calendar className="w-3.5 h-3.5" />
-            <span>Book Visit</span>
+            {/* Expanding Bubble Fill Effect from Bottom Center that fully covers the entire button */}
+            <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-primary-800 transition-transform duration-700 ease-out group-hover:scale-[16] pointer-events-none" />
+
+            {/* Label (Shifts left on hover to reveal the incoming arrow) */}
+            <span className="relative z-10 inline-flex items-center gap-1.5 transition-transform duration-400 ease-out group-hover:-translate-x-2.5">
+              <Calendar className="w-3.5 h-3.5 shrink-0" />
+              <span>Book Visit</span>
+            </span>
+
+            {/* Sliding Arrow Icon (Enters smoothly from right overflow) */}
+            <span className="absolute right-3.5 z-10 translate-x-4 opacity-0 transition-all duration-400 ease-out group-hover:translate-x-0 group-hover:opacity-100">
+              <ArrowRight className="w-3.5 h-3.5 text-white" />
+            </span>
           </Link>
 
           {/* Mobile Hamburger Toggle Button */}
