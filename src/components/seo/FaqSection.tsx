@@ -36,9 +36,9 @@ const FAQS: FaqItem[] = [
       'For continuous 24/7 care, we assign dedicated primary and rotation caregivers to ensure uninterrupted coverage with rested staff. A dedicated care coordinator monitors vitals logs, medication compliance, and patient comfort daily.',
   },
   {
-    question: 'Are clinical consumables (syringes, spirit, gloves) provided by the nurse?',
+    question: 'Are clinical consumables, IV fluids, and medical equipment provided by the nurse?',
     answer:
-      'Our nurses arrive with professional diagnostic kits (digital BP monitors, pulse oximeters, thermometers) and basic consumables for injections or dressing visits. Prescribed pharmaceuticals, specialized surgical dressings, and IV fluids should be kept ready based on your physician’s prescription.',
+      'Our visiting nurses arrive with basic diagnostic essentials (digital BP monitors, pulse oximeters, thermometers) and routine visit disposables (gloves, spirit swabs). Prescribed pharmaceuticals, specialized surgical dressings, and IV fluids should be kept ready based on your physician’s prescription. If you require our team to arrange IV fluids, specialized dressing kits, or medical equipment, please notify us in advance during booking; procurement of arranged consumables and equipment requires prior intimation and advance payment.',
   },
 ];
 
