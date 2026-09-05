@@ -29,6 +29,9 @@ const config: Config = {
           950: "#1e003a",
         }
       },
+      transitionTimingFunction: {
+        spring: "cubic-bezier(0.175, 0.885, 0.32, 1.1)", // Framer bounce: 0.1 spring physics equivalent
+      },
     },
   },
   plugins: [],
