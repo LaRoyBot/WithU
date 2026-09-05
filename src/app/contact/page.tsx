@@ -1,15 +1,12 @@
 import React from 'react';
 import Link from 'next/link';
+import HeaderNavbar from '@/components/navigation/HeaderNavbar';
+import Footer from '@/components/navigation/Footer';
 
 export default function ContactPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
-      <div className="bg-white border-b border-gray-100 py-4 px-6">
-        <div className="max-w-6xl mx-auto flex justify-between items-center text-xs">
-          <Link href="/" className="text-sm font-bold text-primary-700">Neetha Nursing Service</Link>
-          <Link href="/services" className="hover:text-primary-600">Services</Link>
-        </div>
-      </div>
+      <HeaderNavbar />
 
       <main className="max-w-3xl mx-auto py-16 px-4 flex-1 space-y-8">
         <div className="space-y-2">
@@ -57,6 +54,8 @@ export default function ContactPage() {
           </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }

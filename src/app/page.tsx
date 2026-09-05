@@ -7,6 +7,7 @@ import HeaderNavbar from '@/components/navigation/HeaderNavbar';
 import FaqSection from '@/components/seo/FaqSection';
 import AreasServedSection from '@/components/seo/AreasServedSection';
 import HeroBackgroundSlider from '@/components/hero/HeroBackgroundSlider';
+import Footer from '@/components/navigation/Footer';
 import {
   ShieldCheck,
   Lock,
@@ -688,74 +689,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-slate-900 text-slate-400 py-16 px-6 border-t border-slate-800">
-        <div className="max-w-6xl mx-auto grid gap-12 sm:grid-cols-3 text-xs leading-relaxed">
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="relative w-8 h-8 overflow-hidden rounded-full border border-slate-800">
-                <Image
-                  src="/images/original/logo.jpg"
-                  alt="Neetha Nursing Service Logo"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <span className="text-white font-extrabold text-sm tracking-tight">Neetha Nursing Service</span>
-            </div>
-            <p className="text-slate-400">
-              Registered clinical home healthcare and elder nursing service provider. Operating in Gachibowli, Lingampally & West Hyderabad under professional clinical guidelines.
-            </p>
-          </div>
-          <div className="space-y-3">
-            <h4 className="text-white font-bold text-sm">Operating Neighborhoods</h4>
-            <div className="flex flex-wrap gap-2 text-xs">
-              <Link href="/locations/lingampally" className="hover:text-primary-400 transition-colors">Lingampally</Link>
-              <span>•</span>
-              <Link href="/locations/gachibowli" className="hover:text-primary-400 transition-colors">Gachibowli</Link>
-              <span>•</span>
-              <Link href="/locations/kondapur" className="hover:text-primary-400 transition-colors">Kondapur</Link>
-              <span>•</span>
-              <Link href="/locations/miyapur" className="hover:text-primary-400 transition-colors">Miyapur</Link>
-              <span>•</span>
-              <Link href="/locations/chandanagar" className="hover:text-primary-400 transition-colors">Chandanagar</Link>
-              <span>•</span>
-              <Link href="/locations/madhapur" className="hover:text-primary-400 transition-colors">Madhapur</Link>
-              <span>•</span>
-              <Link href="/locations/financial-district" className="hover:text-primary-400 transition-colors">Financial District</Link>
-            </div>
-          </div>
-          <div className="space-y-3">
-            <h4 className="text-white font-bold text-sm">Quick Contacts</h4>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-primary-400" />
-                <span>Call: +91 8341069693 / +91 9397925412</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-primary-400" />
-                <span>WhatsApp: +91 8341069693</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-primary-400" />
-                <span>24/7 Service Support</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="max-w-6xl mx-auto mt-12 pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] text-slate-500">
-          <div>
-            © {new Date().getFullYear()} Neetha Nursing Service. All rights reserved. Encrypted with industrial standard AES-256-GCM. Fully aligned to India's DPDP Act, 2023.
-          </div>
-          <div className="flex items-center gap-4 text-slate-400">
-            <Link href="/customer/login" className="hover:text-primary-400 transition-colors">Customer / Patient Login</Link>
-            <span>•</span>
-            <Link href="/employee/login" className="hover:text-primary-400 transition-colors">Staff Login</Link>
-            <span>•</span>
-            <Link href="/admin" className="hover:text-primary-400 transition-colors">Admin Control Center</Link>
-          </div>
-        </div>
-      </footer>
+      {/* Reusable Comprehensive Footer */}
+      <Footer />
 
       {/* Floating WhatsApp FAB */}
       <a

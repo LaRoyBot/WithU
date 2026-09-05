@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
 import { HYDERABAD_LOCALITIES } from '@/components/seo/AreasServedSection';
+import { BLOG_ARTICLES } from '@/data/blogArticles';
 
 const FALLBACK_SERVICE_SLUGS = [
   'im-iv-injections',
@@ -35,6 +36,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/services`,
       lastModified: now,
       changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/blog`,
+      lastModified: now,
+      changeFrequency: 'daily',
       priority: 0.9,
     },
     {
@@ -78,5 +85,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.85,
   }));
 
-  return [...staticRoutes, ...serviceRoutes, ...locationRoutes];
+  // Clinical Blog Article Detail Routes
+  const blogRoutes: MetadataRoute.Sitemap = BLOG_ARTICLES.map((article) => ({
+    url: `${baseUrl}/blog/${article.slug}`,
+    lastModified: new Date(article.updatedAt),
+    changeFrequency: 'weekly',
+    priority: 0.85,
+  }));
+
+  return [...staticRoutes, ...serviceRoutes, ...locationRoutes, ...blogRoutes];
 }

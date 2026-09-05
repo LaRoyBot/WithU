@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import HeaderNavbar from '@/components/navigation/HeaderNavbar';
 import FaqSection from '@/components/seo/FaqSection';
-import { ShieldCheck, CheckCircle2, Clock, PhoneCall, ArrowRight, Sparkles } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, Clock, PhoneCall, ArrowRight, Sparkles, BookOpen } from 'lucide-react';
+import Footer from '@/components/navigation/Footer';
+import { BLOG_ARTICLES } from '@/data/blogArticles';
 
 interface ServicePageProps {
   params: Promise<{ slug: string }>;
@@ -213,10 +215,52 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
               </a>
             </div>
           </div>
+
+          {/* Related Clinical Knowledge & Care Guides */}
+          {(() => {
+            const relatedGuides = BLOG_ARTICLES.filter((a) =>
+              a.relatedServiceSlugs.includes(service.slug)
+            );
+            if (relatedGuides.length === 0) return null;
+
+            return (
+              <div className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-8 space-y-4 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-primary-600" />
+                    <span>Clinical Guides & Family Care Advice for {service.name}</span>
+                  </h3>
+                  <Link href="/blog" className="text-xs font-bold text-primary-600 hover:text-primary-700">
+                    View All Guides →
+                  </Link>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {relatedGuides.map((guide) => (
+                    <Link
+                      key={guide.slug}
+                      href={`/blog/${guide.slug}`}
+                      className="p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-primary-50/60 hover:border-primary-200 transition-all group space-y-1.5"
+                    >
+                      <div className="text-[10px] font-extrabold uppercase tracking-wider text-primary-600">
+                        {guide.categoryLabel} • {guide.readTimeMinutes} min read
+                      </div>
+                      <h4 className="text-xs font-extrabold text-slate-900 group-hover:text-primary-800 leading-snug line-clamp-2">
+                        {guide.title}
+                      </h4>
+                      <p className="text-[11px] text-slate-600 line-clamp-2 leading-relaxed">
+                        {guide.metaDescription}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </main>
 
       <FaqSection />
+      <Footer />
     </div>
   );
 }

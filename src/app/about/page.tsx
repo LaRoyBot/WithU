@@ -1,18 +1,12 @@
 import React from 'react';
 import Link from 'next/link';
+import HeaderNavbar from '@/components/navigation/HeaderNavbar';
+import Footer from '@/components/navigation/Footer';
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
-      <div className="bg-white border-b border-gray-100 py-4 px-6">
-        <div className="max-w-6xl mx-auto flex justify-between items-center text-xs">
-          <Link href="/" className="text-sm font-bold text-primary-700">Neetha Nursing Service</Link>
-          <div className="flex gap-4">
-            <Link href="/services" className="hover:text-primary-600">Services</Link>
-            <Link href="/contact" className="hover:text-primary-600">Contact</Link>
-          </div>
-        </div>
-      </div>
+      <HeaderNavbar />
 
       <main className="max-w-3xl mx-auto py-16 px-4 flex-1 space-y-8">
         <div className="space-y-3">
@@ -37,6 +31,8 @@ export default function AboutPage() {
           </ul>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }
