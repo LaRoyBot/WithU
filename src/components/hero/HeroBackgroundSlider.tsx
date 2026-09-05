@@ -15,8 +15,8 @@ interface HeroBackgroundSliderProps {
 }
 
 export default function HeroBackgroundSlider({ children }: HeroBackgroundSliderProps) {
-  // Seamless loop by repeating slides array
-  const duplicatedSlides = [...SLIDES, ...SLIDES, ...SLIDES];
+  // Seamless loop by repeating slides array once (2 identical sets)
+  const duplicatedSlides = [...SLIDES, ...SLIDES];
 
   return (
     <section className="relative overflow-hidden w-full bg-slate-950 border-b border-slate-800 min-h-[640px] lg:min-h-[700px] flex items-center">
@@ -26,18 +26,18 @@ export default function HeroBackgroundSlider({ children }: HeroBackgroundSliderP
             transform: translateX(0%);
           }
           100% {
-            transform: translateX(-33.333%);
+            transform: translateX(-50%);
           }
         }
         .animate-hero-slide {
           display: flex;
-          width: 300%;
-          animation: heroSlowSlide 55s linear infinite;
+          width: 600%;
+          animation: heroSlowSlide 165s linear infinite;
           will-change: transform;
         }
         @media (max-width: 768px) {
           .animate-hero-slide {
-            animation-duration: 40s;
+            animation-duration: 120s;
           }
         }
       `}</style>
@@ -46,7 +46,7 @@ export default function HeroBackgroundSlider({ children }: HeroBackgroundSliderP
       <div className="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none">
         <div className="animate-hero-slide h-full">
           {duplicatedSlides.map((slide, idx) => (
-            <div key={idx} className="relative w-1/4 h-full shrink-0 min-h-[640px] lg:min-h-[700px]">
+            <div key={idx} className="relative w-[12.5%] h-full shrink-0 min-h-[640px] lg:min-h-[700px]">
               <Image
                 src={slide.src}
                 alt={slide.alt}
